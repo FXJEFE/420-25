@@ -1,0 +1,13 @@
+2026-08-13 05:15:30,785 - INFO - signal_processor started.
+2026-08-13 05:15:37,955 - INFO - Signals written → /Users/localhugo/Desktop/FXJEFE_Project/data/signals_output.csv
+              price signal
+symbol                    
+AUDUSD      0.70584   sell
+BTCUSD  63581.60000    buy
+ETHUSD   1885.39000   sell
+EURUSD      1.15210   sell
+GBPUSD      1.34904   sell
+USDCAD      1.39392   sell
+USDJPY    159.39200   sell
+XAUUSD   4407.81000   sell
+XRPUSD      1.00420   sell

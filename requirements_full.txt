@@ -1,0 +1,57 @@
+# Core Data Science
+numpy>=1.21.0
+pandas>=1.3.0
+scipy>=1.7.0
+scikit-learn>=0.24.0
+
+# ML Frameworks
+xgboost>=1.5.0
+lightgbm>=3.3.0
+catboost>=1.0.0
+keras>=2.10.0
+tensorflow>=2.8.0
+
+# Deep Learning Utils
+torch>=1.10.0
+
+# API & Web
+flask>=2.0.0
+fastapi>=0.95.0
+uvicorn[standard]>=0.20.0
+requests>=2.28.0
+httpx>=0.23.0
+
+# Data Processing
+joblib>=1.1.0
+scikit-learn>=0.24.0
+numba>=0.55.0
+
+# Time Series & Financial
+arch>=5.0.0
+statsmodels>=0.13.0
+optuna>=3.0.0
+
+# NLP & Text
+textblob>=0.17.1
+
+# MT5 Integration
+MetaTrader5>=5.0.0
+
+# Technical Analysis
+ta-lib>=0.4.0
+
+# Utilities
+python-dotenv>=0.19.0
+pyyaml>=5.4.0
+tqdm>=4.62.0
+
+# Serialization
+pickle5>=0.0.11
+
+# Environment & Testing
+pytest>=7.0.0
+python-dateutil>=2.8.2
+
+# Optional: ONNX for model export
+onnx>=1.10.0
+onnxruntime>=1.12.0

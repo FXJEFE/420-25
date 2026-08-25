@@ -1,0 +1,6 @@
+2026-08-13 05:14:44,015 - INFO - Loaded 50588 rows, 146 columns from data/FXJEFE_Features.csv
+2026-08-13 05:14:44,016 - INFO - All required columns present.
+2026-08-13 05:14:44,022 - INFO - No NaN values in feature columns.
+2026-08-13 05:14:44,024 - INFO - Symbols found: ['AUDUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD', 'USDCAD', 'USDJPY', 'XAUUSD', 'XRPUSD']
+2026-08-13 05:14:44,026 - INFO - Rows per symbol: {'BTCUSD': 6011, 'ETHUSD': 6011, 'XRPUSD': 6011, 'GBPUSD': 5437, 'USDCAD': 5436, 'AUDUSD': 5435, 'EURUSD': 5435, 'USDJPY': 5435, 'XAUUSD': 5377}
+2026-08-13 05:14:44,026 - INFO - Data validation complete.

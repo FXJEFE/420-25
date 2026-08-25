@@ -1,0 +1,153 @@
+MT5 EXPERT ADVISORS - QUICK REFERENCE GUIDE
+macOS M1 Tahoe 26 via Wine
+
+YOUR SETUP:
+===========
+✅ 278 files organized into 4 folders
+✅ 39 Expert Advisors (trading EAs)
+✅ 35 MQL5 libraries (shared includes)
+✅ 6 Indicator scripts
+✅ 198 Machine Learning models
+✅ Automated sync script created
+✅ Deployment manifest with checksums
+
+
+FOLDER LOCATION:
+================
+
+/Users/localhugo/Desktop/FXJEFE_Project/data/mt5_experts/
+
+├── advisors/          (39 files)  - Expert Advisors
+├── includes/          (35 files)  - MQL5 libraries
+├── indicators/        (6 files)   - Indicators
+└── models/            (198 files) - ML models
+
+
+MOST IMPORTANT COMMANDS:
+========================
+
+1. SYNC FILES TO WINE MT5 (DO THIS FIRST):
+
+   cd /Users/localhugo/Desktop/FXJEFE_Project
+   ./sync_to_wine_mt5.sh
+
+   ✓ Copies all .ex5 files to Wine MT5 Experts folder
+   ✓ Copies all .mqh files to Wine MT5 Include folder
+   ✓ Copies all indicators to Wine MT5 Indicators folder
+
+
+2. CHECK DEPLOYMENT STATUS:
+
+   python3 mt5_deployment_status.py
+
+   ✓ Verifies all files are organized
+   ✓ Shows what was deployed
+   ✓ Prints next steps
+
+
+3. READ THE FULL GUIDE:
+
+   cat /Users/localhugo/Desktop/FXJEFE_Project/data/mt5_experts/README.md
+
+   ✓ Full setup instructions
+   ✓ Troubleshooting guide
+   ✓ Workflow documentation
+
+
+TYPICAL WORKFLOW:
+=================
+
+Step 1: Run sync script once
+  $ ./sync_to_wine_mt5.sh
+
+Step 2: Reload MT5 terminal
+  - In MT5: Press F5 or go to Terminal → Restart
+
+Step 3: Check Navigator
+  - Press Ctrl+N to open Navigator
+  - You should see Expert Advisors and Indicators
+
+Step 4: Attach EA to chart
+  - Right-click chart → Expert Advisors → Select EA → OK
+
+Step 5: Start trading!
+  - EA will begin trading on the chart
+
+
+IF YOU EDIT MQ5 SOURCE CODE:
+============================
+
+1. Edit .mq5 file in /data/mt5_experts/advisors/
+2. In MT5, open MetaEditor (F9)
+3. Compile the file (F5)
+4. Run sync script again:
+   $ ./sync_to_wine_mt5.sh
+
+
+VERIFY FILES WERE SYNCED:
+==========================
+
+Check if files are in Wine MT5 directories:
+
+  # Check Experts
+  $ ls ~/.wine/drive_c/users/LarryLocal/AppData/Roaming/MetaQuotes/Terminal/*/MQL5/Experts/Predict.ex5
+
+  # Check Includes
+  $ ls ~/.wine/drive_c/users/LarryLocal/AppData/Roaming/MetaQuotes/Terminal/*/MQL5/Include/*.mqh | head -10
+
+  # Check Indicators
+  $ ls ~/.wine/drive_c/users/LarryLocal/AppData/Roaming/MetaQuotes/Terminal/*/MQL5/Indicators/
+
+
+SOMETHING WRONG?
+================
+
+Files not appearing in MT5 Navigator?
+  1. Run sync script again: ./sync_to_wine_mt5.sh
+  2. Reload MT5: Press F5
+  3. Check if Wine paths exist (see above)
+
+Wine paths don't exist?
+  Make sure MT5 is installed in Wine and terminals exist
+
+Want to see all logs?
+  $ tail -100 /Users/localhugo/Desktop/FXJEFE_Project/Logs/deploy_mt5_experts.log
+
+Want to see deployment manifest?
+  $ cat /Users/localhugo/Desktop/FXJEFE_Project/data/mt5_experts/DEPLOYMENT_MANIFEST.json
+
+
+WHAT YOU GOT:
+=============
+
+deploy_mt5_experts.py    - Main deployment script (already ran)
+sync_to_wine_mt5.sh     - Sync files to Wine MT5 (run this!)
+mt5_deployment_status.py - Check deployment status
+README.md               - Full documentation
+DEPLOYMENT_MANIFEST.json - Checksums & version tracking
+
+
+KEY KEYBOARD SHORTCUTS (MT5):
+=============================
+
+Ctrl+N      Open Navigator
+F5          Reload/Refresh Terminal
+F9          Open MetaEditor
+F7          Backtest / Strategy Tester
+Ctrl+H      Open Account History
+Ctrl+E      Expert/EA settings
+
+
+START HERE:
+===========
+
+1. cd /Users/localhugo/Desktop/FXJEFE_Project
+2. ./sync_to_wine_mt5.sh
+3. Reload MT5 (F5)
+4. Check Navigator (Ctrl+N)
+5. Attach EA to chart!
+
+===================================================================
+Generated: 2026-08-13
+Status: DEPLOYMENT COMPLETE
+===================================================================

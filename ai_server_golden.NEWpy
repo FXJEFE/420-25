@@ -1,0 +1,328 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+FXJEFE Golden Server — Pipeline Alignment Plan v2
+Port 8080 | 29-feature vector | 0.77 gate | 3-group consensus
+No retraining. Loads April–June 2025 .pkl/.json/.onnx from PROJECT_ROOT.
+ACCEPT_ALL features on input; signal only if consensus + confidence >= 0.77.
+"""
+from __future__ import annotations
+
+import json
+import logging
+import os
+import sys
+import traceback
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import numpy as np
+
+try:
+    from flask import Flask, jsonify, request
+except ImportError:
+    print("pip install flask")
+    raise
+
+PROJECT_ROOT = Path(__file__).resolve().parent
+CONFIG_PATH = PROJECT_ROOT / "config.json"
+
+# Exact 29-feature order (Alignment Plan v2)
+FEATURES_29: List[str] = [
+    "price", "atr", "ema_diff", "rsi", "garch_vol", "macd_diff",
+    "vwap", "price_vwap_diff", "bb_position", "roc", "stochastic",
+    "cci", "williams", "momentum", "realized_vol", "chaikin_vol",
+    "adx", "rvi", "obv", "volume_delta", "ad_line", "vol_osc",
+    "supertrend", "hma", "ichimoku_tenkan", "sar", "dpo", "spread", "sentiment",
+]
+FEATURES_9 = FEATURES_29[:9]
+FEATURES_6 = ["price", "atr", "ema_diff", "rsi", "macd_diff", "vwap"]
+
+GATE = 0.77
+HOST = "127.0.0.1"
+PORT = 8080
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [GOLDEN] %(levelname)s %(message)s",
+)
+log = logging.getLogger("golden")
+
+app = Flask(__name__)
+LOADED: Dict[str, Any] = {}
+OPTIONAL: Dict[str, Any] = {}
+
+
+def load_config() -> dict:
+    if CONFIG_PATH.is_file():
+        try:
+            return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+        except Exception as e:
+            log.warning("config read failed: %s", e)
+    return {}
+
+
+def _joblib_load(path: Path):
+    import joblib
+    return joblib.load(path)
+
+
+def _xgb_load(path: Path):
+    import xgboost as xgb
+    booster = xgb.Booster()
+    booster.load_model(str(path))
+    return booster
+
+
+def register_models(cfg: dict) -> None:
+    """Core first, optional second. Models live in PROJECT_ROOT (not nested MT5 path)."""
+    models_dir = Path(cfg.get("models_path") or PROJECT_ROOT)
+    if not models_dir.is_dir():
+        models_dir = PROJECT_ROOT
+
+    core = {
+        "xgb_6": ("xgboost_model.json", "xgb", FEATURES_6),
+        "ensemble_9a": ("ensamble_model.pkl", "pkl", FEATURES_9),
+        "rf_9b": ("my_model (2).pkl", "pkl", FEATURES_9),
+        "voting_9c": ("my_model (3).pkl", "pkl", FEATURES_9),
+        "rf_9d": ("my_model - Copy.pkl", "pkl", FEATURES_9),
+        "rf_28": ("my_model.pkl", "pkl", FEATURES_29[:28] if len(FEATURES_29) >= 28 else FEATURES_29),
+    }
+    for key, (fname, kind, feats) in core.items():
+        path = models_dir / fname
+        if not path.is_file():
+            path = PROJECT_ROOT / fname
+        if not path.is_file():
+            log.warning("core missing %s (%s)", key, fname)
+            continue
+        try:
+            if kind == "xgb":
+                LOADED[key] = {"model": _xgb_load(path), "kind": "xgb", "features": feats}
+            else:
+                LOADED[key] = {"model": _joblib_load(path), "kind": "pkl", "features": feats}
+            log.info("loaded core %s from %s", key, path.name)
+        except Exception as e:
+            log.warning("failed core %s: %s", key, e)
+
+    optional_files = {
+        "rf_big": ("models/my_modelbig.pkl", "pkl", FEATURES_29),
+        "stacking": ("models/stacking_model.pkl", "pkl", FEATURES_29),
+        "lgbm_onnx": ("models/lightgbm_model.onnx", "onnx", FEATURES_29),
+    }
+    for key, (rel, kind, feats) in optional_files.items():
+        path = PROJECT_ROOT / rel
+        if not path.is_file():
+            continue
+        try:
+            if kind == "onnx":
+                import onnxruntime as ort
+                OPTIONAL[key] = {
+                    "model": ort.InferenceSession(str(path)),
+                    "kind": "onnx",
+                    "features": feats,
+                    "weight": 0.5,
+                }
+            else:
+                OPTIONAL[key] = {
+                    "model": _joblib_load(path),
+                    "kind": "pkl",
+                    "features": feats,
+                    "weight": 0.5,
+                }
+            log.info("loaded optional %s", key)
+        except Exception as e:
+            log.warning("optional skip %s: %s", key, e)
+
+
+def vector_from_payload(data: dict, feature_names: List[str]) -> np.ndarray:
+    """Build row vector; missing keys → 0.0 (no refuse/block)."""
+    row = []
+    for name in feature_names:
+        v = data.get(name, 0.0)
+        try:
+            row.append(float(v))
+        except (TypeError, ValueError):
+            row.append(0.0)
+    return np.asarray(row, dtype=np.float64).reshape(1, -1)
+
+
+def predict_one(entry: dict, data: dict) -> Tuple[str, float]:
+    """Return (buy|sell|hold, probability in [0,1])."""
+    model = entry["model"]
+    kind = entry["kind"]
+    feats = entry["features"]
+    X = vector_from_payload(data, feats)
+    try:
+        if kind == "xgb":
+            import xgboost as xgb
+            dmat = xgb.DMatrix(X, feature_names=feats)
+            proba = float(model.predict(dmat)[0])
+            if proba >= 0.5:
+                return "buy", proba
+            return "sell", 1.0 - proba
+        if kind == "onnx":
+            inp = model.get_inputs()[0].name
+            out = model.run(None, {inp: X.astype(np.float32)})[0]
+            proba = float(np.ravel(out)[0])
+            if proba >= 0.5:
+                return "buy", proba
+            return "sell", 1.0 - proba
+        # sklearn / voting
+        if hasattr(model, "predict_proba"):
+            proba_arr = model.predict_proba(X)[0]
+            classes = list(getattr(model, "classes_", [0, 1]))
+            if len(proba_arr) >= 2:
+                # assume higher class = buy-ish
+                buy_idx = classes.index(1) if 1 in classes else int(np.argmax(proba_arr))
+                proba = float(proba_arr[buy_idx])
+            else:
+                proba = float(proba_arr[0])
+            pred = model.predict(X)[0]
+            label = str(pred).lower()
+            if label in ("1", "buy", "long"):
+                return "buy", proba
+            if label in ("0", "-1", "sell", "short"):
+                return "sell", proba if proba <= 0.5 else 1.0 - proba
+            return ("buy" if proba >= 0.5 else "sell"), max(proba, 1.0 - proba)
+        pred = model.predict(X)[0]
+        label = str(pred).lower()
+        if label in ("1", "buy", "long"):
+            return "buy", 0.6
+        if label in ("0", "-1", "sell", "short"):
+            return "sell", 0.6
+        return "hold", 0.5
+    except Exception as e:
+        log.warning("predict_one error: %s", e)
+        return "hold", 0.0
+
+
+def group_vote(keys: List[str], store: dict, data: dict) -> Tuple[str, float, int]:
+    votes = []
+    probs = []
+    for k in keys:
+        if k not in store:
+            continue
+        sig, p = predict_one(store[k], data)
+        if sig != "hold":
+            votes.append(sig)
+            probs.append(p)
+    if not votes:
+        return "hold", 0.0, 0
+    # majority within group
+    buy_n = sum(1 for v in votes if v == "buy")
+    sell_n = sum(1 for v in votes if v == "sell")
+    if buy_n > sell_n:
+        return "buy", float(np.mean([p for v, p in zip(votes, probs) if v == "buy"])), len(votes)
+    if sell_n > buy_n:
+        return "sell", float(np.mean([p for v, p in zip(votes, probs) if v == "sell"])), len(votes)
+    return "hold", float(np.mean(probs)), len(votes)
+
+
+def consensus_predict(data: dict, gate: float) -> dict:
+    """
+    Needle-threading EDGE:
+      Gate 1: all three groups agree (non-hold)
+      Gate 2: combined confidence >= gate (default 0.77)
+    """
+    xgb_keys = [k for k in LOADED if k.startswith("xgb")]
+    nine_keys = [k for k in LOADED if k in ("ensemble_9a", "rf_9b", "voting_9c", "rf_9d")]
+    full_keys = [k for k in LOADED if k in ("rf_28",) or k.startswith("rf_28")]
+
+    g1, p1, n1 = group_vote(xgb_keys, LOADED, data)
+    g2, p2, n2 = group_vote(nine_keys, LOADED, data)
+    g3, p3, n3 = group_vote(full_keys, LOADED, data)
+
+    # optional half-weight soft influence on confidence only (not hard veto)
+    opt_probs = []
+    for k, entry in OPTIONAL.items():
+        sig, p = predict_one(entry, data)
+        w = float(entry.get("weight", 0.5))
+        if sig != "hold":
+            opt_probs.append(p * w)
+
+    groups = [g1, g2, g3]
+    active = [s for s in groups if s != "hold"]
+    n_models = n1 + n2 + n3 + len(opt_probs)
+
+    if len(active) == 3 and len(set(active)) == 1:
+        final_signal = active[0]
+        conf = float(np.mean([p for p in (p1, p2, p3) if p > 0] or [0.0]))
+        if opt_probs:
+            conf = float(0.85 * conf + 0.15 * np.mean(opt_probs))
+    else:
+        final_signal = "hold"
+        conf = float(np.mean([p for p in (p1, p2, p3) if p > 0] or [0.0]))
+
+    if final_signal != "hold" and conf < gate:
+        final_signal = "hold"
+
+    atr = float(data.get("atr") or 0.0)
+    price = float(data.get("price") or 0.0)
+    stop_loss = 0.0
+    if atr > 0 and price > 0:
+        stop_loss = price - 1.5 * atr if final_signal == "buy" else price + 1.5 * atr
+
+    return {
+        "signal": final_signal,
+        "confidence": round(conf, 4),
+        "probability": round(conf, 4),
+        "n_models": n_models,
+        "stop_loss": round(stop_loss, 5) if stop_loss else None,
+        "groups": {"xgb": g1, "nine": g2, "full": g3},
+        "gate": gate,
+        "features_count": 29,
+        "symbol": data.get("symbol"),
+    }
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    cfg = load_config()
+    gate = float(cfg.get("min_confidence_threshold", GATE))
+    return jsonify({
+        "status": "running",
+        "loaded_models": list(LOADED.keys()) + list(OPTIONAL.keys()),
+        "core_count": len(LOADED),
+        "optional_count": len(OPTIONAL),
+        "gate": gate,
+        "features_count": 29,
+        "port": PORT,
+        "policy": "ACCEPT_ALL_FEATURES",
+    })
+
+
+@app.route("/predict", methods=["POST"])
+def predict():
+    cfg = load_config()
+    gate = float(cfg.get("min_confidence_threshold", GATE))
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+    except Exception:
+        data = {}
+    if not isinstance(data, dict):
+        return jsonify({"error": "JSON object required", "signal": "hold"}), 400
+    # ALL OK — no feature filtering/blocking; extras ignored, missing → 0
+    try:
+        out = consensus_predict(data, gate)
+        log.info(
+            "predict symbol=%s signal=%s conf=%.3f n=%s groups=%s",
+            out.get("symbol"), out["signal"], out["confidence"], out["n_models"], out["groups"],
+        )
+        return jsonify(out)
+    except Exception as e:
+        log.error("predict failed: %s\n%s", e, traceback.format_exc())
+        return jsonify({"signal": "hold", "confidence": 0.0, "error": str(e)}), 500
+
+
+def main():
+    cfg = load_config()
+    global GATE, PORT
+    GATE = float(cfg.get("min_confidence_threshold", 0.77))
+    PORT = int(cfg.get("api_port") or cfg.get("port") or 8080)
+    register_models(cfg)
+    log.info("GOLDEN server starting on %s:%s gate=%.2f models=%s", HOST, PORT, GATE, list(LOADED))
+    app.run(host=HOST, port=PORT, threaded=True, debug=False)
+
+
+if __name__ == "__main__":
+    main()

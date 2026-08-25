@@ -1,0 +1,15 @@
+{
+  "feature_policy": "ACCEPT_ALL_FEATURES",
+  "feature_registry_locked": true,
+  "feature_registry_version": "v1_april2025",
+  "allow_all_features": true,
+  "strip_features": false,
+  "refuse_features": false,
+  "features_forbidden": [],
+  "auto_enabled": true,
+  "signal_require_model_loaded": true,
+  "signal_require_featureset_match": true,
+  "min_confidence_threshold": 0.77,
+  "ohlcv_columns": ["open", "high", "low", "close", "volume"],
+  "policy_note": "Preferred lists are defaults only. All features accepted. UTF-8 only. Signals only when model loaded and featureset matches EA+server+mq5."
+}

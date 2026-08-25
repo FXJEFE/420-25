@@ -1,0 +1,14 @@
+numpy
+pandas
+scipy
+scikit-learn
+joblib
+flask
+fastapi
+uvicorn[standard]
+requests
+xgboost
+arch
+optuna
+TA-Lib
+MetaTrader5

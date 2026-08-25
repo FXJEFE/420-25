@@ -1,0 +1,15 @@
+services:
+  fxjefe:
+    build: .
+    image: fxjefe:latest
+    container_name: fxjefe
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+      - ./Logs:/app/Logs
+      - ./models:/app/models
+    environment:
+      FXJEFE_FEATURE_POLICY: ACCEPT_ALL_FEATURES
+      FXJEFE_MIN_CONFIDENCE: "0.77"
+    restart: unless-stopped

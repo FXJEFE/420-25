@@ -1,0 +1,446 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+FXJEFE automated path validation
+================================
+
+Checks every resolved path from config/paths.json + baseline defaults:
+  - exists (or creatable)
+  - is file vs directory as expected
+  - read / write access
+  - web URLs parseable
+  - script dir contains .py stages when required
+  - feature lock config present
+  - optional: RAW csv dir non-empty warning
+
+Visible only — prints [FXJEFE-PATHCHK] lines. Never starts hidden shells.
+
+Usage:
+  python path_validate.py
+  python path_validate.py --json-out state/path_validation.json
+  python path_validate.py --require-raw-csv
+  python path_validate.py --fix
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List
+from urllib.parse import urlparse
+
+# ---------------------------------------------------------------------------
+# Prefer local path_loader next to this file / project root
+# ---------------------------------------------------------------------------
+_HERE = Path(__file__).resolve().parent
+if str(_HERE) not in sys.path:
+    sys.path.insert(0, str(_HERE))
+
+try:
+    from path_loader import (
+        default_project_root,
+        ensure_path_dirs,
+        load_paths_file,
+        print_path_map,
+        resolve_paths,
+    )
+except ImportError:
+    # minimal fallback if path_loader missing
+    def default_project_root() -> Path:
+        home = Path(os.environ.get("USERPROFILE", str(Path.home()))) if sys.platform == "win32" else Path.home()
+        return home / "Documents" / "FXJEFE_Project"
+
+    def resolve_paths(root=None):
+        root = root or default_project_root()
+        return {
+            "project_root": str(root),
+            "data_csv_raw": str(root / "data" / "raw_ohlcv"),
+            "data_hist": str(root / "data" / "hist"),
+            "features_dir": str(root / "features"),
+            "scripts_dir": str(root / "pipeline" / "stages"),
+            "web_predict_url": "http://127.0.0.1:8000/predict",
+            "web_health_url": "http://127.0.0.1:8000/health",
+        }
+
+    def ensure_path_dirs(resolved):
+        for k, v in resolved.items():
+            if k.startswith("web_"):
+                continue
+            Path(v).mkdir(parents=True, exist_ok=True)
+
+    def print_path_map():
+        """
+
+        """
+        pass
+
+    def load_paths_file():
+        return {}
+
+
+DIR_KEYS = {
+    "project_root",
+    "venv_dir",
+    "data_local",
+    "data_csv_raw",
+    "data_hist",
+    "features_dir",
+    "models_dir",
+    "scripts_dir",
+    "pipeline_dir",
+    "bridge_dir",
+    "logs_dir",
+    "runs_dir",
+    "state_dir",
+    "production_dir",
+    "mt5_raw_ohlcv",
+}
+
+FILE_KEYS = {
+    "python_executable",
+    "io_manifest",
+}
+
+URL_KEYS = {
+    "web_predict_url",
+    "web_health_url",
+    "web_sentiment_url",
+}
+
+
+def log(msg: str) -> None:
+    print(f"[FXJEFE-PATHCHK] {msg}", flush=True)
+
+
+def ok(msg: str) -> None:
+    print(f"[FXJEFE-PATHCHK][OK] {msg}", flush=True)
+
+
+def warn(msg: str) -> None:
+    print(f"[FXJEFE-PATHCHK][WARN] {msg}", flush=True)
+
+
+def bad(msg: str) -> None:
+    print(f"[FXJEFE-PATHCHK][FAIL] {msg}", flush=True)
+
+
+def check_dir(key: str, path_str: str, *, must_exist: bool, create: bool) -> Dict[str, Any]:
+    """Validate a directory path."""
+    item: Dict[str, Any] = {"key": key, "path": path_str, "type": "dir", "ok": True, "issues": []}
+    if not path_str or not str(path_str).strip():
+        item["ok"] = False
+        item["issues"].append("empty path")
+        return item
+
+    p = Path(path_str)
+    if p.exists() and not p.is_dir():
+        item["ok"] = False
+        item["issues"].append("exists but is not a directory")
+        return item
+
+    if not p.exists():
+        if create:
+            try:
+                p.mkdir(parents=True, exist_ok=True)
+                item["created"] = True
+                ok(f"{key}: created {p}")
+            except OSError as e:
+                item["ok"] = False
+                item["issues"].append(f"cannot create: {e}")
+                return item
+        elif must_exist:
+            item["ok"] = False
+            item["issues"].append("does not exist")
+            return item
+        else:
+            item["issues"].append("does not exist (allowed)")
+            item["ok"] = True
+
+    # permission probes
+    if p.is_dir():
+        if not os.access(p, os.R_OK):
+            item["ok"] = False
+            item["issues"].append("not readable")
+        if not os.access(p, os.W_OK):
+            # warn for production_dir (may be intentionally readonly builds inside)
+            if key == "production_dir":
+                item["issues"].append("not writable (may be OK if only reading builds)")
+            else:
+                item["ok"] = False
+                item["issues"].append("not writable")
+        item["resolved"] = str(p.resolve())
+    return item
+
+
+def check_file(key: str, path_str: str, *, must_exist: bool) -> Dict[str, Any]:
+    item: Dict[str, Any] = {"key": key, "path": path_str, "type": "file", "ok": True, "issues": []}
+    if not path_str or not str(path_str).strip():
+        item["ok"] = False
+        item["issues"].append("empty path")
+        return item
+    p = Path(path_str)
+    if p.exists() and p.is_dir():
+        item["ok"] = False
+        item["issues"].append("path is a directory, expected file")
+        return item
+    if not p.exists():
+        if must_exist:
+            item["ok"] = False
+            item["issues"].append("file does not exist")
+        else:
+            item["issues"].append("file does not exist (optional until created)")
+        return item
+    if not os.access(p, os.R_OK):
+        item["ok"] = False
+        item["issues"].append("not readable")
+    item["resolved"] = str(p.resolve())
+    return item
+
+
+def check_url(key: str, url: str) -> Dict[str, Any]:
+    item: Dict[str, Any] = {"key": key, "path": url, "type": "url", "ok": True, "issues": []}
+    if not url or not str(url).strip():
+        item["ok"] = False
+        item["issues"].append("empty URL")
+        return item
+    try:
+        u = urlparse(url)
+        if u.scheme not in ("http", "https"):
+            item["ok"] = False
+            item["issues"].append(f"unsupported scheme: {u.scheme!r}")
+        if not u.hostname:
+            item["ok"] = False
+            item["issues"].append("missing hostname")
+        item["parsed"] = {"scheme": u.scheme, "host": u.hostname, "port": u.port, "path": u.path}
+    except Exception as e:
+        item["ok"] = False
+        item["issues"].append(str(e))
+    return item
+
+
+def check_scripts_dir(scripts_dir: str) -> Dict[str, Any]:
+    item: Dict[str, Any] = {
+        "key": "scripts_dir_contents",
+        "path": scripts_dir,
+        "type": "scripts",
+        "ok": True,
+        "issues": [],
+        "py_files": [],
+    }
+    p = Path(scripts_dir)
+    if not p.is_dir():
+        item["ok"] = False
+        item["issues"].append("scripts_dir is not a directory")
+        return item
+    pys = sorted(p.glob("*.py"))
+    item["py_files"] = [x.name for x in pys]
+    if not pys:
+        item["issues"].append("no .py stage scripts found (pipeline may be incomplete)")
+        # not a hard fail — user may not have installed kit yet
+    return item
+
+
+def check_feature_config(project_root: str) -> Dict[str, Any]:
+    item: Dict[str, Any] = {"key": "feature_config", "ok": True, "issues": []}
+    root = Path(project_root)
+    cand = None
+    for c in (root / "config" / "config.json", root / "config.json"):
+        if c.is_file():
+            cand = c
+            break
+    if not cand:
+        item["ok"] = False
+        item["issues"].append("config/config.json missing (17-feature lock not installed)")
+        item["path"] = str(root / "config" / "config.json")
+        return item
+    item["path"] = str(cand)
+    try:
+        cfg = json.loads(cand.read_text(encoding="utf-8"))
+        feats = cfg.get("features") or []
+        item["features_count"] = len(feats)
+        if len(feats) != 17:
+            item["ok"] = False
+            item["issues"].append(f"expected 17 features, found {len(feats)}")
+        forbidden = cfg.get("features_forbidden") or []
+        if "garch_vol" not in forbidden:
+            item["issues"].append("garch_vol not listed in features_forbidden (recommended)")
+        # overlap check
+        overlap = set(feats) & set(forbidden)
+        if overlap:
+            item["ok"] = False
+            item["issues"].append(f"features also listed forbidden: {sorted(overlap)}")
+    except Exception as e:
+        item["ok"] = False
+        item["issues"].append(f"cannot parse config: {e}")
+    return item
+
+
+def check_raw_csv(raw_dir: str, require_files: bool) -> Dict[str, Any]:
+    item: Dict[str, Any] = {
+        "key": "data_csv_raw_contents",
+        "path": raw_dir,
+        "type": "raw_csv",
+        "ok": True,
+        "issues": [],
+        "csv_count": 0,
+    }
+    p = Path(raw_dir)
+    if not p.is_dir():
+        item["ok"] = not require_files
+        item["issues"].append("raw dir missing")
+        return item
+    csvs = list(p.glob("*.csv"))
+    item["csv_count"] = len(csvs)
+    item["sample"] = [c.name for c in csvs[:10]]
+    if require_files and not csvs:
+        item["ok"] = False
+        item["issues"].append("no CSV files in data_csv_raw (--require-raw-csv)")
+    elif not csvs:
+        item["issues"].append("no CSV files yet (OK for fresh install)")
+    return item
+
+
+def validate_all(
+    *,
+    create_missing_dirs: bool = True,
+    require_raw_csv: bool = False,
+    require_python_exists: bool = True,
+) -> Dict[str, Any]:
+    """
+    Full automated path validation.
+    Returns structured report; ok=False if any hard failure.
+    """
+    log("starting automated path validation")
+    cfg_file = load_paths_file()
+    resolved = resolve_paths()
+    if create_missing_dirs:
+        try:
+            ensure_path_dirs(resolved)
+        except OSError as e:
+            bad(f"ensure_path_dirs: {e}")
+
+    checks: List[Dict[str, Any]] = []
+    hard_fail = False
+
+    for key, val in sorted(resolved.items()):
+        if key in URL_KEYS:
+            c = check_url(key, val)
+        elif key in FILE_KEYS:
+            must = key == "python_executable" and require_python_exists
+            c = check_file(key, val, must_exist=must)
+        elif key in DIR_KEYS:
+            c = check_dir(key, val, must_exist=False, create=create_missing_dirs)
+        else:
+            # treat unknown as dir-or-string soft check
+            c = {"key": key, "path": val, "type": "other", "ok": True, "issues": []}
+        checks.append(c)
+        if not c.get("ok"):
+            hard_fail = True
+            bad(f"{key}: {', '.join(c.get('issues') or [])} → {val}")
+        elif c.get("issues"):
+            warn(f"{key}: {', '.join(c['issues'])} → {val}")
+        else:
+            ok(f"{key}: {val}")
+
+    # scripts
+    if "scripts_dir" in resolved:
+        sc = check_scripts_dir(resolved["scripts_dir"])
+        checks.append(sc)
+        if sc.get("py_files"):
+            ok(f"scripts_dir has {len(sc['py_files'])} .py files")
+        for iss in sc.get("issues") or []:
+            warn(iss)
+
+    # feature lock
+    if "project_root" in resolved:
+        fc = check_feature_config(resolved["project_root"])
+        checks.append(fc)
+        if not fc.get("ok"):
+            hard_fail = True
+            bad(f"feature_config: {fc.get('issues')}")
+        else:
+            ok(f"feature_config: {fc.get('path')} ({fc.get('features_count')} features)")
+
+    # raw csv
+    if "data_csv_raw" in resolved:
+        rc = check_raw_csv(resolved["data_csv_raw"], require_raw_csv)
+        checks.append(rc)
+        if not rc.get("ok"):
+            hard_fail = True
+            bad(f"raw_csv: {rc.get('issues')}")
+        else:
+            ok(f"raw_csv count={rc.get('csv_count')}")
+
+    # script_io references (if declared)
+    script_io = (cfg_file.get("script_io") or {}).get("scripts") or {}
+    for sid, spec in script_io.items():
+        for direction in ("inputs", "outputs"):
+            for ref in spec.get(direction) or []:
+                if ref in resolved:
+                    p = Path(resolved[ref])
+                    if not p.exists():
+                        warn(f"script_io {sid}.{direction}: {ref} → missing {p}")
+                else:
+                    # absolute path?
+                    p = Path(str(ref))
+                    if p.is_absolute() and not p.exists():
+                        warn(f"script_io {sid}.{direction}: missing {p}")
+
+    report = {
+        "ok": not hard_fail,
+        "at_utc": datetime.now(timezone.utc).isoformat(),
+        "manual_override": bool(cfg_file.get("manual_override")),
+        "resolved": resolved,
+        "checks": checks,
+        "fail_count": sum(1 for c in checks if not c.get("ok")),
+        "warn_count": sum(1 for c in checks if c.get("ok") and c.get("issues")),
+    }
+    log(f"summary ok={report['ok']} fails={report['fail_count']} warns={report['warn_count']}")
+    return report
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="FXJEFE automated path validation")
+    ap.add_argument("--json-out", default="", help="Write full report JSON to this path")
+    ap.add_argument("--require-raw-csv", action="store_true", help="Fail if no CSV in data_csv_raw")
+    ap.add_argument("--no-create", action="store_true", help="Do not auto-create missing directories")
+    ap.add_argument("--fix", action="store_true")
+    ap.add_argument("--print-map", action="store_true", help="Print resolved path map")
+    args = ap.parse_args()
+
+    report = validate_all(
+        create_missing_dirs=not args.no_create,
+        require_raw_csv=args.require_raw_csv,
+    )
+    if args.print_map:
+        print_path_map()
+
+    out = args.json_out
+    if not out:
+        # default under state/
+        root = Path(report["resolved"].get("project_root") or default_project_root())
+        state = root / "state"
+        state.mkdir(parents=True, exist_ok=True)
+        out = str(state / "path_validation_latest.json")
+    try:
+        Path(out).parent.mkdir(parents=True, exist_ok=True)
+        Path(out).write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+        log(f"report → {out}")
+    except OSError as e:
+        bad(f"could not write report: {e}")
+
+    if args.fix:
+        print(json.dumps(report, indent=2, default=str))
+
+    return 0 if report["ok"] else 1
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        print("\n[FXJEFE-PATHCHK] interrupted — no background tasks", flush=True)
+        sys.exit(130)

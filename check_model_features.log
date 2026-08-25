@@ -1,0 +1,3 @@
+2026-08-13 05:15:22,245 - INFO - Model feature count : 28
+2026-08-13 05:15:22,245 - INFO - Config feature count: 28  (['price', 'atr', 'ema_diff', 'rsi', 'macd_diff', 'vwap', 'price_vwap_diff', 'bb_position', 'roc', 'stochastic', 'cci', 'williams', 'momentum', 'realized_vol', 'chaikin_vol', 'adx', 'rvi', 'obv', 'volume_delta', 'ad_line', 'vol_osc', 'supertrend', 'hma', 'ichimoku_tenkan', 'sar', 'dpo', 'spread', 'sentiment'])
+2026-08-13 05:15:22,245 - INFO - Feature count check : OK

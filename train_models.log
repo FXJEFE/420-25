@@ -1,0 +1,4 @@
+2026-08-13 05:15:14,053 - INFO - Loaded 50543 training rows.
+2026-08-13 05:15:14,061 - INFO - Training on 50543 rows with 28 features.
+2026-08-13 05:15:20,722 - INFO - Test accuracy: 0.6698
+2026-08-13 05:15:20,785 - INFO - Model saved → models/my_model.pkl  (expects 28 features)

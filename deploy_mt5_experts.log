@@ -1,0 +1,293 @@
+2026-08-13 04:02:11,914 - INFO - ======================================================================
+2026-08-13 04:02:11,915 - INFO - Starting MT5 Expert Advisors Deployment
+2026-08-13 04:02:11,915 - INFO - Platform: macOS M1 Tahoe 26 via Wine
+2026-08-13 04:02:11,915 - INFO - Timestamp: 2026-08-13T04:02:11.915107
+2026-08-13 04:02:11,915 - INFO - ======================================================================
+2026-08-13 04:02:11,915 - INFO - Organizing MQ5 source files...
+2026-08-13 04:02:11,917 - INFO -   Organized: Detrended Price Oscillator.mq5 → advisors/
+2026-08-13 04:02:11,917 - INFO -   Organized: chv.mq5 → advisors/
+2026-08-13 04:02:11,918 - INFO -   Organized: Quantu_Algo_AI_EA.mq5 → advisors/
+2026-08-13 04:02:11,919 - INFO -   Organized: PredictOGG.mq5 → advisors/
+2026-08-13 04:02:11,920 - INFO -   Organized: SaturnMatrixPredictH1.mq5 → advisors/
+2026-08-13 04:02:11,921 - INFO -   Organized: FXJEFE_ALGO_AIOG12.04.mq5 → advisors/
+2026-08-13 04:02:11,921 - INFO -   Organized: SaturnMatixGenerateFeatures.mq5 → advisors/
+2026-08-13 04:02:11,924 - INFO -   Organized: Predict.mq5 → advisors/
+2026-08-13 04:02:11,925 - INFO -   Organized: FXJEFE_ALGO_AIOGnew3334.mq5 → advisors/
+2026-08-13 04:02:11,926 - INFO -   Organized: vwap.mq5 → advisors/
+2026-08-13 04:02:11,927 - INFO -   Organized: QuantumAlgoAI.mq5 → advisors/
+2026-08-13 04:02:11,928 - INFO -   Organized: Quantum Algo AI.mq5 → advisors/
+2026-08-13 04:02:11,929 - INFO -   Organized: GenerateFeatures.mq5 → advisors/
+2026-08-13 04:02:11,930 - INFO -   Organized: PredictOG.mq5 → advisors/
+2026-08-13 04:02:11,930 - INFO -   Organized: tedsty.mq5 → advisors/
+2026-08-13 04:02:11,932 - INFO -   Organized: testy.mq5 → advisors/
+2026-08-13 04:02:11,933 - INFO -   Organized: dpo.mq5 → advisors/
+2026-08-13 04:02:11,934 - INFO -   Organized: SaturnMatrixPredict.mq5 → advisors/
+2026-08-13 04:02:11,935 - INFO -   Organized: all indicators 40.mq5 → advisors/
+2026-08-13 04:02:11,936 - INFO -   Organized: q.mq5 → advisors/
+2026-08-13 04:02:11,937 - INFO -   Organized: SaturnMatrixEA.mq5 → advisors/
+2026-08-13 04:02:11,938 - INFO -   Organized: TestAPIConnections.mq5 → advisors/
+2026-08-13 04:02:11,939 - INFO -   Organized: e.mq5 → advisors/
+2026-08-13 04:02:11,940 - INFO -   Organized: cho.mq5 → advisors/
+2026-08-13 04:02:11,942 - INFO -   Organized: c.mq5 → advisors/
+2026-08-13 04:02:11,943 - INFO -   Organized: SuperTrend.mq5 → includes/
+2026-08-13 04:02:11,945 - INFO -   Organized: ArrayLong.mqh → includes/
+2026-08-13 04:02:11,946 - INFO -   Organized: AdvancedTrading.mqh → includes/
+2026-08-13 04:02:11,947 - INFO -   Organized: Math.mqh → includes/
+2026-08-13 04:02:11,948 - INFO -   Organized: Trend.mqh → includes/
+2026-08-13 04:02:11,949 - INFO -   Organized: FXJEFE_HFTKit.mqh → includes/
+2026-08-13 04:02:11,950 - INFO -   Organized: ArrayFloat.mqh → includes/
+2026-08-13 04:02:11,951 - INFO -   Organized: ArrayInt.mqh → includes/
+2026-08-13 04:02:11,952 - INFO -   Organized: Trade.mqh → includes/
+2026-08-13 04:02:11,952 - INFO -   Organized: PositionManager.mqh → includes/
+2026-08-13 04:02:11,953 - INFO -   Organized: CPythonConnector.mqh → includes/
+2026-08-13 04:02:11,954 - INFO -   Organized: CHTTPClient.mqh → includes/
+2026-08-13 04:02:11,955 - INFO -   Organized: FXJEFE_SaturnAlign.mqh → includes/
+2026-08-13 04:02:11,957 - INFO -   Organized: json.mqh → includes/
+2026-08-13 04:02:11,958 - INFO -   Organized: SignalProcessor.mqh → includes/
+2026-08-13 04:02:11,959 - INFO -   Organized: FXJEFEFefs.mqh → includes/
+2026-08-13 04:02:11,960 - INFO -   Organized: FXJEFE_SaturnSchema.mqh → includes/
+2026-08-13 04:02:11,960 - INFO -   Organized: CKellyCriterion.mqh → includes/
+2026-08-13 04:02:11,961 - INFO -   Organized: ArrayDouble.mqh → includes/
+2026-08-13 04:02:11,962 - INFO -   Organized: CQuantumTradingEngine.mqh → includes/
+2026-08-13 04:02:11,963 - INFO -   Organized: EnhancedRiskManager.mqh → includes/
+2026-08-13 04:02:11,963 - INFO -   Organized: CCSVFeatureManager.mqh → includes/
+2026-08-13 04:02:11,964 - INFO -   Organized: CErrorHandler.mqh → includes/
+2026-08-13 04:02:11,965 - INFO -   Organized: FXJEFEDefs.mqh → includes/
+2026-08-13 04:02:11,965 - INFO -   Organized: CMLModelManager.mqh → includes/
+2026-08-13 04:02:11,966 - INFO -   Organized: ArrayObj.mqh → includes/
+2026-08-13 04:02:11,966 - INFO -   Organized: AccountInfo.mqh → includes/
+2026-08-13 04:02:11,967 - INFO -   Organized: FXJEFE_Volume.mqh → includes/
+2026-08-13 04:02:11,968 - INFO -   Organized: JAson.mqh → includes/
+2026-08-13 04:02:11,968 - INFO -   Organized: AdvancedPositionSizer.mqh → includes/
+2026-08-13 04:02:11,969 - INFO -   Organized: CLogger.mqh → includes/
+2026-08-13 04:02:11,970 - INFO -   Organized: CPositionManager.mqh → includes/
+2026-08-13 04:02:11,970 - INFO -   Organized: Array.mqh → includes/
+2026-08-13 04:02:11,971 - INFO -   Organized: FXJEFE_Regime.mqh → includes/
+2026-08-13 04:02:11,971 - INFO -   Organized: CSymbolManager.mqh → includes/
+2026-08-13 04:02:11,972 - INFO -   Organized: VolumeOscillator.mq5 → indicators/
+2026-08-13 04:02:11,973 - INFO -   Organized: Hull average 2.mq5 → indicators/
+2026-08-13 04:02:11,973 - INFO -   Organized: ROC.mq5 → indicators/
+2026-08-13 04:02:11,974 - INFO -   Organized: VolumeOsc.mq5 → indicators/
+2026-08-13 04:02:11,974 - INFO -   Organized: HullMa.mq5 → indicators/
+2026-08-13 04:02:11,975 - INFO -   Organized: JsonAPIIndicator.mq5 → indicators/
+2026-08-13 04:02:11,975 - INFO - Organizing compiled EX5 files...
+2026-08-13 04:02:11,983 - INFO -   Compiled: Predicts.ex5 (size: 67676 bytes)
+2026-08-13 04:02:11,983 - INFO -   Compiled: dpo.ex5 (size: 9380 bytes)
+2026-08-13 04:02:11,984 - INFO -   Compiled: VolumeOsc.ex5 (size: 9056 bytes)
+2026-08-13 04:02:11,984 - INFO -   Compiled: e.ex5 (size: 5046 bytes)
+2026-08-13 04:02:11,985 - INFO -   Compiled: c.ex5 (size: 105564 bytes)
+2026-08-13 04:02:11,985 - INFO -   Compiled: cho.ex5 (size: 14122 bytes)
+2026-08-13 04:02:11,986 - INFO -   Compiled: VolumeOscillator.ex5 (size: 11436 bytes)
+2026-08-13 04:02:11,986 - INFO -   Compiled: Detrended Price Oscillator.ex5 (size: 19566 bytes)
+2026-08-13 04:02:11,986 - INFO -   Compiled: chv.ex5 (size: 11570 bytes)
+2026-08-13 04:02:11,987 - INFO -   Compiled: Chaikin.ex5 (size: 9308 bytes)
+2026-08-13 04:02:11,987 - INFO -   Compiled: Predict.ex5 (size: 43032 bytes)
+2026-08-13 04:02:11,988 - INFO -   Compiled: vwap.ex5 (size: 25980 bytes)
+2026-08-13 04:02:11,988 - INFO -   Compiled: GenerateFeatures.ex5 (size: 49438 bytes)
+2026-08-13 04:02:11,989 - INFO -   Compiled: Quantum Algo AI.ex5 (size: 106274 bytes)
+2026-08-13 04:02:11,989 - INFO - Organizing model files...
+2026-08-13 04:02:11,992 - INFO -   Organized: LINKUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:11,993 - INFO -   Organized: DOGEUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:11,994 - INFO -   Organized: DOTUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:11,995 - INFO -   Organized: LINKUSD_H1_binary_xgb.json (.json)
+2026-08-13 04:02:11,996 - INFO -   Organized: NAS100_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:11,997 - INFO -   Organized: EURUSD_D1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:11,998 - INFO -   Organized: SOLUSD_H1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:11,999 - INFO -   Organized: XAUUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:11,999 - INFO -   Organized: SUIUSD_H1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,000 - INFO -   Organized: scaler.pkl (.pkl)
+2026-08-13 04:02:12,000 - INFO -   Organized: PEPEUSD_H4_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,001 - INFO -   Organized: DOTUSD_H1_binary_features.json (.json)
+2026-08-13 04:02:12,002 - INFO -   Organized: DOGEUSD_H1_binary_features.json (.json)
+2026-08-13 04:02:12,002 - INFO -   Organized: MATICUSD_H1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,004 - INFO -   Organized: BTCUSD_H1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:12,004 - INFO -   Organized: SUIUSD_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:12,005 - INFO -   Organized: ETHUSD_H1_binary_features.json (.json)
+2026-08-13 04:02:12,006 - INFO -   Organized: ADAUSD_H1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:12,006 - INFO -   Organized: XRPUSD_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:12,007 - INFO -   Organized: AVAXUSD_D1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:12,008 - INFO -   Organized: XRPUSD_M15_binary_features.json (.json)
+2026-08-13 04:02:12,008 - INFO -   Organized: ETHUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:12,009 - INFO -   Organized: XRPUSD_H1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,010 - INFO -   Organized: SUIUSD_H1_binary_xgb.json (.json)
+2026-08-13 04:02:12,010 - INFO -   Organized: ETHUSD_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:12,011 - INFO -   Organized: MATICUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:12,012 - INFO -   Organized: LINKUSD_D1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,013 - INFO -   Organized: DOGEUSD_H1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:12,014 - INFO -   Organized: USDCAD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:12,015 - INFO -   Organized: AVAXUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:12,016 - INFO -   Organized: DOTUSD_D1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:12,017 - INFO -   Organized: MATICUSD_H4_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,017 - INFO -   Organized: ETHUSD_M15_binary_features.json (.json)
+2026-08-13 04:02:12,018 - INFO -   Organized: PEPEUSD_H1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,018 - INFO -   Organized: SUIUSD_H4_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,020 - INFO -   Organized: MATICUSD_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:12,021 - INFO -   Organized: MATICUSD_H1_binary_features.json (.json)
+2026-08-13 04:02:12,021 - INFO -   Organized: SOLUSD_H4_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,022 - INFO -   Organized: EURUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:12,023 - INFO -   Organized: AVAXUSD_D1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,024 - INFO -   Organized: XRPUSD_H1_binary_xgb.json (.json)
+2026-08-13 04:02:12,025 - INFO -   Organized: XRPUSD_H4_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,026 - INFO -   Organized: ETHUSD_D1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,028 - INFO -   Organized: DOTUSD_H1_binary_xgb.json (.json)
+2026-08-13 04:02:12,031 - INFO -   Organized: ensemble_model_new.pkl (.pkl)
+2026-08-13 04:02:12,032 - INFO -   Organized: BTCUSD_D1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,035 - INFO -   Organized: ETHUSD_H1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:12,038 - INFO -   Organized: ETHUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:12,040 - INFO -   Organized: SOLUSD_H1_binary_xgb.json (.json)
+2026-08-13 04:02:12,041 - INFO -   Organized: EURUSD_M15_binary_features.json (.json)
+2026-08-13 04:02:12,043 - INFO -   Organized: LINKUSD_H1_binary_features.json (.json)
+2026-08-13 04:02:12,045 - INFO -   Organized: MATICUSD_H1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:12,048 - INFO -   Organized: ETHUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:12,050 - INFO -   Organized: config.json (.json)
+2026-08-13 04:02:12,051 - INFO -   Organized: DOTUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:12,053 - INFO -   Organized: DOGEUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:12,054 - INFO -   Organized: DOGEUSD_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:12,056 - INFO -   Organized: LINKUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:12,057 - INFO -   Organized: BTCUSD_H1_binary_xgb.json (.json)
+2026-08-13 04:02:12,058 - INFO -   Organized: ADAUSD_H1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,059 - INFO -   Organized: AVAXUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:12,061 - INFO -   Organized: AUDUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:12,062 - INFO -   Organized: ETHUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:12,064 - INFO -   Organized: DOGEUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:12,066 - INFO -   Organized: USDJPY_D1_binary_xgb.json (.json)
+2026-08-13 04:02:12,067 - INFO -   Organized: ensemble_modelnew.pkl (.pkl)
+2026-08-13 04:02:12,068 - INFO -   Organized: MATICUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:12,068 - INFO -   Organized: BTCUSD_M15_binary_xgb.json (.json)
+2026-08-13 04:02:12,069 - INFO -   Organized: DOGEUSD_H4_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,071 - INFO -   Organized: DOGEUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:12,071 - INFO -   Organized: NAS100_H4_binary_xgb.json (.json)
+2026-08-13 04:02:12,072 - INFO -   Organized: DOTUSD_D1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:12,073 - INFO -   Organized: AVAXUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:12,074 - INFO -   Organized: EURUSD_M15_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:12,077 - INFO -   Organized: xgboost_model.json (.json)
+2026-08-13 04:02:12,998 - INFO -   Organized: my_model.onnx (.onnx)
+2026-08-13 04:02:13,002 - INFO -   Organized: PEPEUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:13,003 - INFO -   Organized: AVAXUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:13,006 - INFO -   Organized: ensamble_model.pkl (.pkl)
+2026-08-13 04:02:13,008 - INFO -   Organized: SOLUSD_D1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,010 - INFO -   Organized: ADAUSD_H4_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,011 - INFO -   Organized: lightgbm_model.pkl (.pkl)
+2026-08-13 04:02:13,013 - INFO -   Organized: ensemble_model.pkl (.pkl)
+2026-08-13 04:02:13,014 - INFO -   Organized: PEPEUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:13,015 - INFO -   Organized: AVAXUSD_H1_binary_features.json (.json)
+2026-08-13 04:02:13,016 - INFO -   Organized: LINKUSD_D1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,017 - INFO -   Organized: PEPEUSD_D1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,019 - INFO -   Organized: ADAUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:13,020 - INFO -   Organized: DOGEUSD_H1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,020 - INFO -   Organized: BTCUSD_M15_binary_features.json (.json)
+2026-08-13 04:02:13,022 - INFO -   Organized: ADAUSD_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,023 - INFO -   Organized: USDJPY_D1_binary_features.json (.json)
+2026-08-13 04:02:13,024 - INFO -   Organized: NOmy_model.pkl (.pkl)
+2026-08-13 04:02:13,026 - INFO -   Organized: SUIUSD_H1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,027 - INFO -   Organized: BTCUSD_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,028 - INFO -   Organized: GBPUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:13,031 - INFO -   Organized: 11_feature_rf.pkl (.pkl)
+2026-08-13 04:02:13,032 - INFO -   Organized: ADAUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:13,032 - INFO -   Organized: XRPUSD_H1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,033 - INFO -   Organized: EURUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:13,034 - INFO -   Organized: ETHUSD_M15_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,035 - INFO -   Organized: data.json (.json)
+2026-08-13 04:02:13,035 - INFO -   Organized: NAS100_H4_binary_features.json (.json)
+2026-08-13 04:02:13,037 - INFO -   Organized: ADAUSD_H1_binary_xgb.json (.json)
+2026-08-13 04:02:13,038 - INFO -   Organized: PEPEUSD_H1_binary_xgb.json (.json)
+2026-08-13 04:02:13,039 - INFO -   Organized: NAS100_M15_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,040 - INFO -   Organized: eNOnsemble_model.pkl (.pkl)
+2026-08-13 04:02:13,041 - INFO -   Organized: GBPUSD_D1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,042 - INFO -   Organized: DOGEUSD_D1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,043 - INFO -   Organized: SUIUSD_H1_binary_features.json (.json)
+2026-08-13 04:02:13,044 - INFO -   Organized: EURUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:13,047 - INFO -   Organized: ETHUSD_M15_binary_xgb.json (.json)
+2026-08-13 04:02:13,049 - INFO -   Organized: DOTUSD_H4_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,050 - INFO -   Organized: SUIUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:13,051 - INFO -   Organized: DOGEUSD_D1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,052 - INFO -   Organized: crypto_config.json (.json)
+2026-08-13 04:02:13,053 - INFO -   Organized: DOTUSD_H1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,054 - INFO -   Organized: EURUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:13,055 - INFO -   Organized: ADAUSD_D1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,056 - INFO -   Organized: BTCUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:13,057 - INFO -   Organized: MATICUSD_H1_binary_xgb.json (.json)
+2026-08-13 04:02:13,057 - INFO -   Organized: XRPUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:13,058 - INFO -   Organized: SOLUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:13,059 - INFO -   Organized: USDCAD_D1_binary_features.json (.json)
+2026-08-13 04:02:13,060 - INFO -   Organized: BTCUSD_D1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,061 - INFO -   Organized: XRPUSD_H1_binary_features.json (.json)
+2026-08-13 04:02:13,062 - INFO -   Organized: crypto_correlation_matrix.pkl (.pkl)
+2026-08-13 04:02:13,063 - INFO -   Organized: ADAUSD_D1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,064 - INFO -   Organized: XAUUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:13,066 - INFO -   Organized: BTCUSD_H1_binary_features.json (.json)
+2026-08-13 04:02:13,067 - INFO -   Organized: AVAXUSD_H1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,071 - INFO -   Organized: 11_feature_rf_XRP_2025_FINAL.pkl (.pkl)
+2026-08-13 04:02:13,073 - INFO -   Organized: AVAXUSD_H1_binary_xgb.json (.json)
+2026-08-13 04:02:13,074 - INFO -   Organized: DOGEUSD_H1_binary_xgb.json (.json)
+2026-08-13 04:02:13,077 - INFO -   Organized: my_modelOG.pkl (.pkl)
+2026-08-13 04:02:13,079 - INFO -   Organized: BTCUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:13,079 - INFO -   Organized: PEPEUSD_H1_binary_features.json (.json)
+2026-08-13 04:02:13,103 - INFO -   Organized: my_model.pkl (.pkl)
+2026-08-13 04:02:13,109 - INFO -   Organized: SOLUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:13,111 - INFO -   Organized: EURUSD_M15_binary_xgb.json (.json)
+2026-08-13 04:02:13,115 - INFO -   Organized: xgboost_best_sharpe.json (.json)
+2026-08-13 04:02:13,116 - INFO -   Organized: AUDUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:13,117 - INFO -   Organized: lightgbm_model.onnx (.onnx)
+2026-08-13 04:02:13,117 - INFO -   Organized: SOLUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:13,118 - INFO -   Organized: PEPEUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:13,119 - INFO -   Organized: SOLUSD_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,120 - INFO -   Organized: BTCUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:13,121 - INFO -   Organized: DOTUSD_H1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,122 - INFO -   Organized: ADAUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:13,123 - INFO -   Organized: LINKUSD_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,124 - INFO -   Organized: PEPEUSD_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,125 - INFO -   Organized: ETHUSD_H1_binary_xgb.json (.json)
+2026-08-13 04:02:13,125 - INFO -   Organized: XRPUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:13,126 - INFO -   Organized: LINKUSD_H1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,127 - INFO -   Organized: SUIUSD_D1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,128 - INFO -   Organized: DOTUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:13,130 - INFO -   Organized: AVAXUSD_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,131 - INFO -   Organized: XRPUSD_D1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,132 - INFO -   Organized: XRPUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:13,133 - INFO -   Organized: DOTUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:13,134 - INFO -   Organized: PEPEUSD_D1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,135 - INFO -   Organized: AVAXUSD_H1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,136 - INFO -   Organized: SUIUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:13,137 - INFO -   Organized: crypto_meta_ranker_H4.pkl (.pkl)
+2026-08-13 04:02:13,160 - INFO -   Organized: stacking_model.pkl (.pkl)
+2026-08-13 04:02:13,162 - INFO -   Organized: EURUSD_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,163 - INFO -   Organized: LINKUSD_H1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,164 - INFO -   Organized: BTCUSD_H1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,164 - INFO -   Organized: PEPEUSD_H1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,165 - INFO -   Organized: lstm_model.h5 (.h5)
+2026-08-13 04:02:13,166 - INFO -   Organized: ETHUSD_H1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,167 - INFO -   Organized: SOLUSD_H1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,168 - INFO -   Organized: SOLUSD_H1_binary_features.json (.json)
+2026-08-13 04:02:13,168 - INFO -   Organized: SUIUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:13,169 - INFO -   Organized: scaler_final.pkl (.pkl)
+2026-08-13 04:02:13,170 - INFO -   Organized: LINKUSD_H4_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,171 - INFO -   Organized: SUIUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:13,172 - INFO -   Organized: SOLUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:13,173 - INFO -   Organized: XRPUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:13,174 - INFO -   Organized: SOLUSD_D1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,175 - INFO -   Organized: SUIUSD_D1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,176 - INFO -   Organized: BTCUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:13,177 - INFO -   Organized: crypto_meta_ranker_D1.pkl (.pkl)
+2026-08-13 04:02:13,179 - INFO -   Organized: LINKUSD_H4_binary_xgb.json (.json)
+2026-08-13 04:02:13,180 - INFO -   Organized: GBPUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:13,181 - INFO -   Organized: ADAUSD_H4_binary_features.json (.json)
+2026-08-13 04:02:13,183 - INFO -   Organized: XRPUSD_M15_binary_xgb.json (.json)
+2026-08-13 04:02:13,184 - INFO -   Organized: PEPEUSD_D1_binary_features.json (.json)
+2026-08-13 04:02:13,185 - INFO -   Organized: ETHUSD_D1_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:13,186 - INFO -   Organized: AVAXUSD_H4_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:13,187 - INFO -   Organized: ADAUSD_H1_binary_features.json (.json)
+2026-08-13 04:02:13,187 - INFO -   Organized: ETHUSD_H4_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:15,417 - INFO -   Organized: crypto_model.pkl (.pkl)
+2026-08-13 04:02:15,421 - INFO -   Organized: LINKUSD_D1_binary_xgb.json (.json)
+2026-08-13 04:02:15,422 - INFO -   Organized: DOTUSD_H4_binary_lgb.pkl (.pkl)
+2026-08-13 04:02:15,423 - INFO -   Organized: XRPUSD_D1_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:15,424 - INFO -   Organized: xgboost_model.onnx (.onnx)
+2026-08-13 04:02:15,425 - INFO -   Organized: BTCUSD_H4_binary_catboost.cbm (.cbm)
+2026-08-13 04:02:15,426 - INFO -   Total models organized: 198 files
+2026-08-13 04:02:15,426 - INFO - Creating deployment manifest...
+2026-08-13 04:02:18,798 - INFO -   Manifest saved: /Users/localhugo/Desktop/FXJEFE_Project/data/mt5_experts/DEPLOYMENT_MANIFEST.json
+2026-08-13 04:02:18,799 - INFO -   Wine sync script created: /Users/localhugo/Desktop/FXJEFE_Project/sync_to_wine_mt5.sh
+2026-08-13 04:02:18,799 - INFO -   README created: /Users/localhugo/Desktop/FXJEFE_Project/data/mt5_experts/README.md
+2026-08-13 04:02:18,802 - INFO - ✅ Deployment complete!
+2026-08-13 04:02:18,802 - INFO - ======================================================================

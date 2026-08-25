@@ -1,0 +1,261 @@
+2026-08-13 03:24:03,292 - INFO - ============================================================
+2026-08-13 03:24:03,293 - INFO - FXJEFE Pipeline starting
+2026-08-13 03:24:03,293 - INFO - Project root : /Users/localhugo/Desktop/FXJEFE_Project
+2026-08-13 03:24:03,293 - INFO - Config       : /Users/localhugo/Desktop/FXJEFE_Project/config.json
+2026-08-13 03:24:03,293 - INFO - AI server    : http://127.0.0.1:8080
+2026-08-13 03:24:03,293 - INFO - ============================================================
+2026-08-13 03:24:03,293 - WARNING - 'requests' not installed — cannot check server health.
+2026-08-13 03:24:03,293 - INFO - AI server not responding — attempting to start it.
+2026-08-13 03:24:03,296 - INFO - Starting AI server: ./ai_server.py
+2026-08-13 03:24:10,299 - WARNING - 'requests' not installed — cannot check server health.
+2026-08-13 03:24:10,300 - WARNING - AI server started but health check failed. Pipeline will continue — server may still be warming up.
+2026-08-13 03:24:10,300 - INFO - [1/7] Step 1 — Sync FXJEFE_Features.csv from MT5
+2026-08-13 03:24:10,372 - INFO -   ✓ mt5_data_sync.py complete
+2026-08-13 03:24:10,372 - INFO - [2/7] Step 2 — Validate raw feature data
+2026-08-13 03:24:10,414 - ERROR -   [validate_data.py] FAILED (exit 1)
+2026-08-13 03:24:10,414 - ERROR -   [validate_data.py]   Traceback (most recent call last):
+2026-08-13 03:24:10,414 - ERROR -   [validate_data.py]     File "./validate_data.py", line 13, in <module>
+2026-08-13 03:24:10,414 - ERROR -   [validate_data.py]       import pandas as pd
+2026-08-13 03:24:10,414 - ERROR -   [validate_data.py]   ModuleNotFoundError: No module named 'pandas'
+2026-08-13 03:24:10,414 - WARNING -   Retrying validate_data.py (attempt 1/3) in 3 s…
+2026-08-13 03:24:13,465 - ERROR -   [validate_data.py] FAILED (exit 1)
+2026-08-13 03:24:13,465 - ERROR -   [validate_data.py]   Traceback (most recent call last):
+2026-08-13 03:24:13,465 - ERROR -   [validate_data.py]     File "./validate_data.py", line 13, in <module>
+2026-08-13 03:24:13,465 - ERROR -   [validate_data.py]       import pandas as pd
+2026-08-13 03:24:13,465 - ERROR -   [validate_data.py]   ModuleNotFoundError: No module named 'pandas'
+2026-08-13 03:24:13,465 - WARNING -   Retrying validate_data.py (attempt 2/3) in 3 s…
+2026-08-13 03:24:16,526 - ERROR -   [validate_data.py] FAILED (exit 1)
+2026-08-13 03:24:16,526 - ERROR -   [validate_data.py]   Traceback (most recent call last):
+2026-08-13 03:24:16,526 - ERROR -   [validate_data.py]     File "./validate_data.py", line 13, in <module>
+2026-08-13 03:24:16,526 - ERROR -   [validate_data.py]       import pandas as pd
+2026-08-13 03:24:16,526 - ERROR -   [validate_data.py]   ModuleNotFoundError: No module named 'pandas'
+2026-08-13 03:24:16,527 - ERROR - Pipeline ABORTED at step 2/7: validate_data.py failed after 3 attempt(s).
+2026-08-13 03:51:19,742 - INFO - ============================================================
+2026-08-13 03:51:19,743 - INFO - FXJEFE Pipeline starting
+2026-08-13 03:51:19,743 - INFO - Project root : /Users/localhugo/Desktop/FXJEFE_Project
+2026-08-13 03:51:19,743 - INFO - Config       : /Users/localhugo/Desktop/FXJEFE_Project/config.json
+2026-08-13 03:51:19,743 - INFO - AI server    : http://127.0.0.1:8080
+2026-08-13 03:51:19,743 - INFO - ============================================================
+2026-08-13 03:51:19,743 - WARNING - 'requests' not installed — cannot check server health.
+2026-08-13 03:51:19,743 - INFO - AI server not responding — attempting to start it.
+2026-08-13 03:51:19,744 - INFO - Starting AI server: ./ai_server.py
+2026-08-13 03:51:26,746 - WARNING - 'requests' not installed — cannot check server health.
+2026-08-13 03:51:26,746 - WARNING - AI server started but health check failed. Pipeline will continue — server may still be warming up.
+2026-08-13 03:51:26,747 - INFO - [1/7] Step 1 — Sync FXJEFE_Features.csv from MT5
+2026-08-13 03:51:26,793 - INFO -   ✓ mt5_data_sync.py complete
+2026-08-13 03:51:26,793 - INFO - [2/7] Step 2 — Validate raw feature data
+2026-08-13 03:51:26,829 - ERROR -   [validate_data.py] FAILED (exit 1)
+2026-08-13 03:51:26,830 - ERROR -   [validate_data.py]   Traceback (most recent call last):
+2026-08-13 03:51:26,830 - ERROR -   [validate_data.py]     File "./validate_data.py", line 13, in <module>
+2026-08-13 03:51:26,830 - ERROR -   [validate_data.py]       import pandas as pd
+2026-08-13 03:51:26,830 - ERROR -   [validate_data.py]   ModuleNotFoundError: No module named 'pandas'
+2026-08-13 03:51:26,830 - WARNING -   Retrying validate_data.py (attempt 1/3) in 3 s…
+2026-08-13 03:51:29,878 - ERROR -   [validate_data.py] FAILED (exit 1)
+2026-08-13 03:51:29,878 - ERROR -   [validate_data.py]   Traceback (most recent call last):
+2026-08-13 03:51:29,878 - ERROR -   [validate_data.py]     File "./validate_data.py", line 13, in <module>
+2026-08-13 03:51:29,878 - ERROR -   [validate_data.py]       import pandas as pd
+2026-08-13 03:51:29,878 - ERROR -   [validate_data.py]   ModuleNotFoundError: No module named 'pandas'
+2026-08-13 03:51:29,879 - WARNING -   Retrying validate_data.py (attempt 2/3) in 3 s…
+2026-08-13 03:51:32,937 - ERROR -   [validate_data.py] FAILED (exit 1)
+2026-08-13 03:51:32,937 - ERROR -   [validate_data.py]   Traceback (most recent call last):
+2026-08-13 03:51:32,937 - ERROR -   [validate_data.py]     File "./validate_data.py", line 13, in <module>
+2026-08-13 03:51:32,937 - ERROR -   [validate_data.py]       import pandas as pd
+2026-08-13 03:51:32,937 - ERROR -   [validate_data.py]   ModuleNotFoundError: No module named 'pandas'
+2026-08-13 03:51:32,937 - ERROR - Pipeline ABORTED at step 2/7: validate_data.py failed after 3 attempt(s).
+2026-08-13 04:04:34,380 - INFO - ============================================================
+2026-08-13 04:04:34,380 - INFO - FXJEFE Pipeline starting
+2026-08-13 04:04:34,380 - INFO - Project   : /Users/localhugo/Desktop/FXJEFE_Project
+2026-08-13 04:04:34,380 - INFO - Config    : /Users/localhugo/Desktop/FXJEFE_Project/config.json
+2026-08-13 04:04:34,380 - INFO - AI server : http://127.0.0.1:8080
+2026-08-13 04:04:34,380 - INFO - MQL5 path : %APPDATA%/MetaQuotes\Terminal\81A933A9AFC5DE3C23B15CAB19C63850\MQL5
+2026-08-13 04:04:34,380 - INFO - ============================================================
+2026-08-13 04:04:34,380 - INFO - AI server not responding — starting it.
+2026-08-13 04:04:34,382 - INFO - Starting AI server: /Users/localhugo/Desktop/FXJEFE_Project/ai_server.py
+2026-08-13 04:04:41,384 - WARNING - AI server started but health check failed — continuing.
+2026-08-13 04:04:41,386 - INFO - [1/8] Step 1 — Generate features from MT5 (2000 M1 bars × 6 symbols)
+2026-08-13 04:04:41,440 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:04:41,440 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:04:41,440 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 16, in <module>
+2026-08-13 04:04:41,440 - ERROR -   [mt5_generate_features.py]       import numpy as np
+2026-08-13 04:04:41,440 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'numpy'
+2026-08-13 04:04:41,440 - WARNING -   Retrying mt5_generate_features.py (1/3) in 3 s...
+2026-08-13 04:04:44,505 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:04:44,506 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:04:44,506 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 16, in <module>
+2026-08-13 04:04:44,506 - ERROR -   [mt5_generate_features.py]       import numpy as np
+2026-08-13 04:04:44,506 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'numpy'
+2026-08-13 04:04:44,506 - WARNING -   Retrying mt5_generate_features.py (2/3) in 3 s...
+2026-08-13 04:04:47,574 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:04:47,575 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:04:47,575 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 16, in <module>
+2026-08-13 04:04:47,575 - ERROR -   [mt5_generate_features.py]       import numpy as np
+2026-08-13 04:04:47,575 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'numpy'
+2026-08-13 04:04:47,575 - ERROR - Pipeline ABORTED at step 1/8: mt5_generate_features.py failed after 3 attempt(s).
+2026-08-13 04:09:37,421 - INFO - ============================================================
+2026-08-13 04:09:37,421 - INFO - FXJEFE Pipeline starting
+2026-08-13 04:09:37,421 - INFO - Project   : /Users/localhugo/Desktop/FXJEFE_Project
+2026-08-13 04:09:37,421 - INFO - Config    : /Users/localhugo/Desktop/FXJEFE_Project/config.json
+2026-08-13 04:09:37,421 - INFO - AI server : http://127.0.0.1:8080
+2026-08-13 04:09:37,421 - INFO - MQL5 path : %APPDATA%/MetaQuotes\Terminal\81A933A9AFC5DE3C23B15CAB19C63850\MQL5
+2026-08-13 04:09:37,421 - INFO - ============================================================
+2026-08-13 04:09:37,421 - INFO - AI server not responding — starting it.
+2026-08-13 04:09:37,423 - INFO - Starting AI server: /Users/localhugo/Desktop/FXJEFE_Project/ai_server.py
+2026-08-13 04:09:39,406 - INFO - ============================================================
+2026-08-13 04:09:39,406 - INFO - FXJEFE Pipeline starting
+2026-08-13 04:09:39,406 - INFO - Project   : /Users/localhugo/Desktop/FXJEFE_Project
+2026-08-13 04:09:39,406 - INFO - Config    : /Users/localhugo/Desktop/FXJEFE_Project/config.json
+2026-08-13 04:09:39,406 - INFO - AI server : http://127.0.0.1:8080
+2026-08-13 04:09:39,406 - INFO - MQL5 path : %APPDATA%/MetaQuotes\Terminal\81A933A9AFC5DE3C23B15CAB19C63850\MQL5
+2026-08-13 04:09:39,406 - INFO - ============================================================
+2026-08-13 04:09:39,406 - INFO - AI server not responding — starting it.
+2026-08-13 04:09:39,410 - INFO - Starting AI server: /Users/localhugo/Desktop/FXJEFE_Project/ai_server.py
+2026-08-13 04:09:46,416 - WARNING - AI server started but health check failed — continuing.
+2026-08-13 04:09:46,417 - INFO - [1/8] Step 1 — Generate features from MT5 (2000 M1 bars × 6 symbols)
+2026-08-13 04:09:46,464 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:09:46,464 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:09:46,464 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 16, in <module>
+2026-08-13 04:09:46,464 - ERROR -   [mt5_generate_features.py]       import numpy as np
+2026-08-13 04:09:46,464 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'numpy'
+2026-08-13 04:09:46,464 - WARNING -   Retrying mt5_generate_features.py (1/3) in 3 s...
+2026-08-13 04:09:49,518 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:09:49,518 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:09:49,518 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 16, in <module>
+2026-08-13 04:09:49,518 - ERROR -   [mt5_generate_features.py]       import numpy as np
+2026-08-13 04:09:49,518 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'numpy'
+2026-08-13 04:09:49,518 - WARNING -   Retrying mt5_generate_features.py (2/3) in 3 s...
+2026-08-13 04:09:52,572 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:09:52,572 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:09:52,572 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 16, in <module>
+2026-08-13 04:09:52,572 - ERROR -   [mt5_generate_features.py]       import numpy as np
+2026-08-13 04:09:52,573 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'numpy'
+2026-08-13 04:09:52,573 - ERROR - Pipeline ABORTED at step 1/8: mt5_generate_features.py failed after 3 attempt(s).
+2026-08-13 04:11:42,299 - INFO - ============================================================
+2026-08-13 04:11:42,299 - INFO - FXJEFE Pipeline starting
+2026-08-13 04:11:42,299 - INFO - Project   : /Users/localhugo/Desktop/FXJEFE_Project
+2026-08-13 04:11:42,299 - INFO - Config    : /Users/localhugo/Desktop/FXJEFE_Project/config.json
+2026-08-13 04:11:42,299 - INFO - AI server : http://127.0.0.1:8080
+2026-08-13 04:11:42,299 - INFO - MQL5 path : %APPDATA%/MetaQuotes\Terminal\81A933A9AFC5DE3C23B15CAB19C63850\MQL5
+2026-08-13 04:11:42,299 - INFO - ============================================================
+2026-08-13 04:11:42,299 - INFO - AI server not responding — starting it.
+2026-08-13 04:11:42,301 - INFO - Starting AI server: /Users/localhugo/Desktop/FXJEFE_Project/ai_server.py
+2026-08-13 04:11:49,301 - WARNING - AI server started but health check failed — continuing.
+2026-08-13 04:11:49,301 - INFO - [1/8] Step 1 — Generate features from MT5 (2000 M1 bars × 6 symbols)
+2026-08-13 04:11:49,354 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:11:49,355 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:11:49,355 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 16, in <module>
+2026-08-13 04:11:49,355 - ERROR -   [mt5_generate_features.py]       import numpy as np
+2026-08-13 04:11:49,355 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'numpy'
+2026-08-13 04:11:49,355 - WARNING -   Retrying mt5_generate_features.py (1/3) in 3 s...
+2026-08-13 04:11:52,399 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:11:52,400 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:11:52,400 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 16, in <module>
+2026-08-13 04:11:52,400 - ERROR -   [mt5_generate_features.py]       import numpy as np
+2026-08-13 04:11:52,400 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'numpy'
+2026-08-13 04:11:52,400 - WARNING -   Retrying mt5_generate_features.py (2/3) in 3 s...
+2026-08-13 04:11:55,455 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:11:55,455 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:11:55,455 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 16, in <module>
+2026-08-13 04:11:55,455 - ERROR -   [mt5_generate_features.py]       import numpy as np
+2026-08-13 04:11:55,455 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'numpy'
+2026-08-13 04:11:55,455 - ERROR - Pipeline ABORTED at step 1/8: mt5_generate_features.py failed after 3 attempt(s).
+2026-08-13 04:16:15,424 - INFO - ============================================================
+2026-08-13 04:16:15,424 - INFO - FXJEFE Pipeline starting
+2026-08-13 04:16:15,424 - INFO - Project   : /Users/localhugo/Desktop/FXJEFE_Project
+2026-08-13 04:16:15,424 - INFO - Config    : /Users/localhugo/Desktop/FXJEFE_Project/config.json
+2026-08-13 04:16:15,424 - INFO - AI server : http://127.0.0.1:8080
+2026-08-13 04:16:15,424 - INFO - MQL5 path : %APPDATA%/MetaQuotes\Terminal\81A933A9AFC5DE3C23B15CAB19C63850\MQL5
+2026-08-13 04:16:15,424 - INFO - ============================================================
+2026-08-13 04:16:15,443 - INFO - AI server not responding — starting it.
+2026-08-13 04:16:15,448 - INFO - Starting AI server: /Users/localhugo/Desktop/FXJEFE_Project/ai_server.py
+2026-08-13 04:16:22,459 - WARNING - AI server started but health check failed — continuing.
+2026-08-13 04:16:22,459 - INFO - [1/8] Step 1 — Generate features from MT5 (2000 M1 bars × 6 symbols)
+2026-08-13 04:16:23,004 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:16:23,005 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:16:23,005 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 18, in <module>
+2026-08-13 04:16:23,005 - ERROR -   [mt5_generate_features.py]       import MetaTrader5 as mt5
+2026-08-13 04:16:23,005 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'MetaTrader5'
+2026-08-13 04:16:23,005 - WARNING -   Retrying mt5_generate_features.py (1/3) in 3 s...
+2026-08-13 04:16:26,595 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:16:26,595 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:16:26,595 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 18, in <module>
+2026-08-13 04:16:26,595 - ERROR -   [mt5_generate_features.py]       import MetaTrader5 as mt5
+2026-08-13 04:16:26,595 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'MetaTrader5'
+2026-08-13 04:16:26,595 - WARNING -   Retrying mt5_generate_features.py (2/3) in 3 s...
+2026-08-13 04:16:30,173 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:16:30,173 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:16:30,173 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 18, in <module>
+2026-08-13 04:16:30,173 - ERROR -   [mt5_generate_features.py]       import MetaTrader5 as mt5
+2026-08-13 04:16:30,173 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'MetaTrader5'
+2026-08-13 04:16:30,173 - ERROR - Pipeline ABORTED at step 1/8: mt5_generate_features.py failed after 3 attempt(s).
+2026-08-13 04:48:04,507 - INFO - ============================================================
+2026-08-13 04:48:04,507 - INFO - FXJEFE Pipeline starting
+2026-08-13 04:48:04,507 - INFO - Project   : /Users/localhugo/Desktop/FXJEFE_Project
+2026-08-13 04:48:04,507 - INFO - Config    : /Users/localhugo/Desktop/FXJEFE_Project/config.json
+2026-08-13 04:48:04,507 - INFO - AI server : http://127.0.0.1:8080
+2026-08-13 04:48:04,507 - INFO - MQL5 path : %APPDATA%/MetaQuotes\Terminal\81A933A9AFC5DE3C23B15CAB19C63850\MQL5
+2026-08-13 04:48:04,507 - INFO - ============================================================
+2026-08-13 04:48:04,515 - INFO - AI server not responding — starting it.
+2026-08-13 04:48:04,518 - INFO - Starting AI server: /Users/localhugo/Desktop/FXJEFE_Project/ai_server.py
+2026-08-13 04:48:11,527 - WARNING - AI server started but health check failed — continuing.
+2026-08-13 04:48:11,528 - INFO - [1/8] Step 1 — Generate features from MT5 (2000 M1 bars × 6 symbols)
+2026-08-13 04:48:12,165 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:48:12,165 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:48:12,165 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 18, in <module>
+2026-08-13 04:48:12,165 - ERROR -   [mt5_generate_features.py]       import MetaTrader5 as mt5
+2026-08-13 04:48:12,165 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'MetaTrader5'
+2026-08-13 04:48:12,165 - WARNING -   Retrying mt5_generate_features.py (1/3) in 3 s...
+2026-08-13 04:48:15,794 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:48:15,794 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:48:15,794 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 18, in <module>
+2026-08-13 04:48:15,794 - ERROR -   [mt5_generate_features.py]       import MetaTrader5 as mt5
+2026-08-13 04:48:15,794 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'MetaTrader5'
+2026-08-13 04:48:15,794 - WARNING -   Retrying mt5_generate_features.py (2/3) in 3 s...
+2026-08-13 04:48:19,465 - ERROR -   [mt5_generate_features.py] FAILED (exit 1)
+2026-08-13 04:48:19,466 - ERROR -   [mt5_generate_features.py]   Traceback (most recent call last):
+2026-08-13 04:48:19,466 - ERROR -   [mt5_generate_features.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/mt5_generate_features.py", line 18, in <module>
+2026-08-13 04:48:19,466 - ERROR -   [mt5_generate_features.py]       import MetaTrader5 as mt5
+2026-08-13 04:48:19,466 - ERROR -   [mt5_generate_features.py]   ModuleNotFoundError: No module named 'MetaTrader5'
+2026-08-13 04:48:19,466 - ERROR - Pipeline ABORTED at step 1/8: mt5_generate_features.py failed after 3 attempt(s).
+2026-08-13 05:14:41,925 - INFO - ============================================================
+2026-08-13 05:14:41,926 - INFO - FXJEFE Pipeline starting
+2026-08-13 05:14:41,926 - INFO - Project   : /Users/localhugo/Desktop/FXJEFE_Project
+2026-08-13 05:14:41,926 - INFO - Config    : /Users/localhugo/Desktop/FXJEFE_Project/config.json
+2026-08-13 05:14:41,926 - INFO - AI server : http://127.0.0.1:8080
+2026-08-13 05:14:41,926 - INFO - MQL5 path : %APPDATA%/MetaQuotes\Terminal\81A933A9AFC5DE3C23B15CAB19C63850\MQL5
+2026-08-13 05:14:41,926 - INFO - ============================================================
+2026-08-13 05:14:41,966 - INFO - AI server already running.
+2026-08-13 05:14:41,966 - INFO - Skipping MT5 data generation (--skip-mt5).
+2026-08-13 05:14:41,966 - INFO - [1/7] Step 2 — Validate raw feature data
+2026-08-13 05:14:44,062 - INFO -   OK — validate_data.py
+2026-08-13 05:14:44,062 - INFO - [2/7] Step 3 — Data quality check (columns + stats)
+2026-08-13 05:14:46,593 - INFO -   OK — Load_and_Process.py
+2026-08-13 05:14:46,594 - INFO - [3/7] Step 4 — Compute future price & generate buy/hold/sell labels
+2026-08-13 05:15:06,800 - INFO -   OK — generate_labels.py
+2026-08-13 05:15:06,801 - INFO - [4/7] Step 5 — Train legacy RandomForest → my_model.pkl (fallback)
+2026-08-13 05:15:20,901 - INFO -   OK — train_models.py
+2026-08-13 05:15:20,902 - INFO - [5/7] Step 6 — Verify legacy model feature count matches config (28)
+2026-08-13 05:15:22,331 - INFO -   OK — check_model_features.py
+2026-08-13 05:15:22,331 - INFO - [6/7] Step 7 — Walk-forward XGB/LGB per-symbol models (main)
+2026-08-13 05:15:22,968 - ERROR -   [full_pipeline.py] FAILED (exit 1)
+2026-08-13 05:15:22,968 - ERROR -   [full_pipeline.py]   Traceback (most recent call last):
+2026-08-13 05:15:22,968 - ERROR -   [full_pipeline.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/full_pipeline.py", line 30, in <module>
+2026-08-13 05:15:22,968 - ERROR -   [full_pipeline.py]       import talib
+2026-08-13 05:15:22,968 - ERROR -   [full_pipeline.py]   ModuleNotFoundError: No module named 'talib'
+2026-08-13 05:15:22,968 - WARNING -   Retrying full_pipeline.py (1/3) in 3 s...
+2026-08-13 05:15:26,572 - ERROR -   [full_pipeline.py] FAILED (exit 1)
+2026-08-13 05:15:26,572 - ERROR -   [full_pipeline.py]   Traceback (most recent call last):
+2026-08-13 05:15:26,572 - ERROR -   [full_pipeline.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/full_pipeline.py", line 30, in <module>
+2026-08-13 05:15:26,572 - ERROR -   [full_pipeline.py]       import talib
+2026-08-13 05:15:26,572 - ERROR -   [full_pipeline.py]   ModuleNotFoundError: No module named 'talib'
+2026-08-13 05:15:26,572 - WARNING -   Retrying full_pipeline.py (2/3) in 3 s...
+2026-08-13 05:15:30,214 - ERROR -   [full_pipeline.py] FAILED (exit 1)
+2026-08-13 05:15:30,214 - ERROR -   [full_pipeline.py]   Traceback (most recent call last):
+2026-08-13 05:15:30,214 - ERROR -   [full_pipeline.py]     File "/Users/localhugo/Desktop/FXJEFE_Project/full_pipeline.py", line 30, in <module>
+2026-08-13 05:15:30,214 - ERROR -   [full_pipeline.py]       import talib
+2026-08-13 05:15:30,214 - ERROR -   [full_pipeline.py]   ModuleNotFoundError: No module named 'talib'
+2026-08-13 05:15:30,214 - WARNING -   SKIPPED (optional) — full_pipeline.py failed but pipeline continues.
+2026-08-13 05:15:30,214 - INFO - [7/7] Step 8 — Generate SMA crossover reference signals
+2026-08-13 05:15:38,004 - INFO -   OK — signal_processor.py
+2026-08-13 05:15:38,004 - INFO - ============================================================
+2026-08-13 05:15:38,004 - INFO - Pipeline completed — AI server ready for EA signals.
+2026-08-13 05:15:38,004 - INFO - ============================================================

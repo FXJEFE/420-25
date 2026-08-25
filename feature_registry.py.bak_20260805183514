@@ -1,0 +1,227 @@
+# -*- coding: utf-8 -*-
+"""
+FXJEFE frozen feature registry — versioned, immutable at runtime.
+
+Compile:
+  python -m py_compile feature_registry.py
+
+Version policy
+--------------
+- ACTIVE_VERSION selects which frozen pack is enforced.
+- Older packs remain in REGISTRY forever (mentor / audit trail).
+- To introduce a new feature count later: add REGISTRY["v2"] = {...},
+  then set ACTIVE_VERSION = "v2" ONLY after retraining + explicit unlock.
+- Runtime code must call get_active() — never hardcode feature lists.
+
+DO NOT edit PREDICT/TRAIN tuples in-place for live production.
+Add a new version key instead.
+"""
+from __future__ import annotations
+
+from typing import Any, Dict, FrozenSet, List, Tuple
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Version packs (append-only history)
+# ═══════════════════════════════════════════════════════════════════════════
+
+REGISTRY: Dict[str, Dict[str, Any]] = {
+    # April 2025 restore — primary lock
+    "v1_april2025": {
+        "description": "April 2025 restore — predict 17 / train 28",
+        "predict": (
+            "price", "atr", "ema_diff", "rsi", "macd_diff", "vwap",
+            "price_vwap_diff", "bb_position", "roc", "stochastic", "cci",
+            "williams", "momentum", "adx", "rvi", "spread", "sentiment",
+        ),
+        "train": (
+            "price", "atr", "ema_diff", "rsi", "macd_diff", "vwap",
+            "price_vwap_diff", "bb_position", "roc", "stochastic", "cci",
+            "williams", "momentum", "realized_vol", "chaikin_vol", "adx",
+            "rvi", "obv", "volume_delta", "ad_line", "vol_osc", "supertrend",
+            "hma", "ichimoku_tenkan", "sar", "dpo", "spread", "sentiment",
+        ),
+        "min_confidence": 0.77,
+        "ohlcv": ("open", "high", "low", "close", "volume"),
+    },
+    # Placeholder for a future expanded set — inactive until unlocked
+    "v2_example_expanded": {
+        "description": "EXAMPLE only — not active. Copy pattern when promoting a new count.",
+        "predict": (),  # fill when promoting
+        "train": (),
+        "min_confidence": 0.77,
+        "ohlcv": ("open", "high", "low", "close", "volume"),
+        "inactive": True,
+    },
+}
+
+# Which pack is enforced right now
+ACTIVE_VERSION: str = "v1_april2025"
+
+FORBIDDEN_FEATURES: FrozenSet[str] = frozenset({
+    "garch_vol", "future_price", "future_return", "price_change", "regime",
+    "price_lag1", "price_lag2", "price_lag3",
+    "rsi_lag1", "rsi_lag2", "rsi_lag3",
+    "macd_diff_lag", "macd_diff_lag1", "macd_diff_lag2", "macd_diff_lag3",
+    "atr_lag", "atr_lag1", "atr_lag2", "atr_lag3",
+    "hour_of_day", "day_of_week", "volume_ratio",
+})
+
+
+def list_versions() -> List[str]:
+    return list(REGISTRY.keys())
+
+
+def get_pack(version: str | None = None) -> Dict[str, Any]:
+    ver = version or ACTIVE_VERSION
+    if ver not in REGISTRY:
+        raise KeyError(f"Unknown feature registry version: {ver}")
+    pack = REGISTRY[ver]
+    if pack.get("inactive"):
+        raise RuntimeError(f"Registry version {ver} is marked inactive — unlock before use")
+    return pack
+
+
+def get_active() -> Dict[str, Any]:
+    """Runtime entry point — always use this."""
+    pack = get_pack(ACTIVE_VERSION)
+    predict = tuple(pack["predict"])
+    train = tuple(pack["train"])
+    if not predict or not train:
+        raise RuntimeError(f"Active registry {ACTIVE_VERSION} has empty feature lists")
+    if not set(predict).issubset(set(train)):
+        raise RuntimeError("predict features must be a subset of train features")
+    return {
+        "version": ACTIVE_VERSION,
+        "description": pack.get("description", ""),
+        "predict": predict,
+        "train": train,
+        "predict_count": len(predict),
+        "train_count": len(train),
+        "min_confidence": float(pack.get("min_confidence", 0.77)),
+        "ohlcv": tuple(pack.get("ohlcv", ("open", "high", "low", "close", "volume"))),
+        "forbidden": FORBIDDEN_FEATURES,
+    }
+
+
+# Back-compat aliases (derived from active pack — do not assign literals here)
+def _boot():
+    a = get_active()
+    return a
+
+
+_ACTIVE = None
+
+
+def _a():
+    global _ACTIVE
+    if _ACTIVE is None:
+        _ACTIVE = get_active()
+    return _ACTIVE
+
+
+@property
+def PREDICT_FEATURES():  # type: ignore
+    return _a()["predict"]
+
+
+# Module-level frozen snapshots for import style: from feature_registry import PREDICT_FEATURES
+def __getattr__(name: str):
+    a = _a()
+    mapping = {
+        "PREDICT_FEATURES": a["predict"],
+        "TRAIN_FEATURES": a["train"],
+        "PREDICT_COUNT": a["predict_count"],
+        "TRAIN_COUNT": a["train_count"],
+        "MIN_CONFIDENCE": a["min_confidence"],
+        "OHLCV_HEADERS": a["ohlcv"],
+        "ACTIVE_VERSION": ACTIVE_VERSION,
+    }
+    if name in mapping:
+        return mapping[name]
+    raise AttributeError(name)
+
+
+def predict_feature_list() -> List[str]:
+    return list(_a()["predict"])
+
+
+def train_feature_list() -> List[str]:
+    return list(_a()["train"])
+
+
+def is_forbidden(name: str) -> bool:
+    if name in FORBIDDEN_FEATURES:
+        return True
+    if name.startswith("macd_diff_lag") or name.startswith("atr_lag") or name.startswith("price_lag"):
+        return True
+    return False
+
+
+def validate_predict_keys(keys) -> Tuple[bool, List[str]]:
+    keys = set(keys)
+    allowed = set(_a()["predict"])
+    errors = []
+    banned = sorted(keys & FORBIDDEN_FEATURES)
+    if banned:
+        errors.append(f"forbidden in /predict: {banned}")
+    extra = sorted(keys - allowed)
+    if extra:
+        errors.append(f"non-canonical: {extra}")
+    missing = sorted(allowed - keys)
+    if missing:
+        errors.append(f"missing: {missing}")
+    return (len(errors) == 0, errors)
+
+
+def model_features_match(model_features, mode: str = "predict") -> Tuple[bool, str]:
+    a = _a()
+    expected = list(a["predict"] if mode == "predict" else a["train"])
+    got = list(model_features or [])
+    if len(got) != len(expected):
+        # allow train models that are supersets containing all predict features
+        if mode == "predict" and set(expected).issubset(set(got)):
+            return True, "superset containing all predict features"
+        return False, f"count mismatch: model={len(got)} expected={len(expected)} ({mode})"
+    if got == expected:
+        return True, "exact order match"
+    if set(got) == set(expected):
+        return True, "same set, different order (allowed)"
+    return False, f"set mismatch missing={sorted(set(expected)-set(got))} extra={sorted(set(got)-set(expected))}"
+
+
+def register_new_version(
+    version_id: str,
+    *,
+    predict: Tuple[str, ...],
+    train: Tuple[str, ...],
+    min_confidence: float = 0.77,
+    description: str = "",
+    activate: bool = False,
+) -> None:
+    """
+    Mentor path for later feature counts.
+    Adds a new pack; does NOT activate unless activate=True.
+    Callers should retrain models before activate=True.
+    """
+    if version_id in REGISTRY and not REGISTRY[version_id].get("inactive"):
+        raise ValueError(f"{version_id} already exists and is active-capable — use a new id")
+    if not set(predict).issubset(set(train)):
+        raise ValueError("predict must be subset of train")
+    REGISTRY[version_id] = {
+        "description": description or version_id,
+        "predict": tuple(predict),
+        "train": tuple(train),
+        "min_confidence": float(min_confidence),
+        "ohlcv": ("open", "high", "low", "close", "volume"),
+        "inactive": not activate,
+    }
+    global ACTIVE_VERSION, _ACTIVE
+    if activate:
+        ACTIVE_VERSION = version_id
+        _ACTIVE = None  # refresh cache
+
+
+if __name__ == "__main__":
+    a = get_active()
+    print("ACTIVE", a["version"], "predict", a["predict_count"], "train", a["train_count"], "conf", a["min_confidence"])
+    print("versions", list_versions())

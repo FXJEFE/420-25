@@ -1,0 +1,14 @@
+numpy
+pandas
+scipy
+scikit-learn
+joblib
+flask
+fastapi
+uvicorn[standard]
+requests
+xgboost
+arch
+optuna
+TA-Lib
+# pandas-ta requires Python>=3.12 — use TA-Lib on 3.11
