@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+FXJEFE path loader — manual override + auto baseline.
+
+DEBUG:
+  - Reads config/paths.json first when manual_override is true.
+  - Empty strings fall back to Documents/FXJEFE_Project/... identical layout.
+  - Never invents paths outside project unless user set them explicitly.
+  - print_path_map() shows every resolved path for verification.
+"""
+from __future__ import annotations
+
+import json
+import os
+import sys
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+
+def _home() -> Path:
+    if sys.platform == "win32":
+        return Path(os.environ.get("USERPROFILE", str(Path.home())))
+    return Path.home()
+
+
+def default_project_root() -> Path:
+    return _home() / "Documents" / "FXJEFE_Project"
+
+
+def _defaults(root: Path) -> Dict[str, str]:
+    return {
+        "project_root": str(root),
+        "python_executable": sys.executable,
+        "venv_dir": str(root / "venv"),
+        "data_local": str(root / "data"),
+        "data_csv_raw": str(root / "data" / "raw_ohlcv"),
+        "data_hist": str(root / "data" / "hist"),
+        "features_dir": str(root / "features"),
+        "models_dir": str(root / "models"),
+        "scripts_dir": str(root / "pipeline" / "stages"),
+        "pipeline_dir": str(root / "pipeline"),
+        "bridge_dir": str(root / "bridge"),
+        "logs_dir": str(root / "logs"),
+        "runs_dir": str(root / "runs"),
+        "state_dir": str(root / "state"),
+        "production_dir": str(root / "production"),
+        "mt5_raw_ohlcv": str(root / "data" / "raw_ohlcv"),
+        "web_predict_url": os.environ.get("FXJEFE_PREDICT_URL", "http://127.0.0.1:8080/predict"),
+        "web_health_url": os.environ.get("FXJEFE_BRIDGE_URL", "http://127.0.0.1:8080/health"),
+        "web_sentiment_url": os.environ.get("FXJEFE_SENTIMENT_URL", "http://127.0.0.1:8080/sentiment"),
+        "io_manifest": str(root / "config" / "script_io.json"),
+    }
+
+
+def load_paths_file(root: Optional[Path] = None) -> Dict[str, Any]:
+    root = root or default_project_root()
+    candidates = [
+        root / "config" / "paths.json",
+        root / "paths.json",
+        Path(os.environ["FXJEFE_PATHS_JSON"]) if os.environ.get("FXJEFE_PATHS_JSON") else None,
+    ]
+    for c in candidates:
+        if c and c.is_file():
+            with open(c, "r", encoding="utf-8") as f:
+                return json.load(f)
+    return {"manual_override": False, "paths": {}, "script_io": {"scripts": {}}}
+
+
+def resolve_paths(root: Optional[Path] = None) -> Dict[str, str]:
+    """
+    Merge defaults with config/paths.json.
+    manual_override True + non-empty value => user path wins.
+    """
+    root = root or default_project_root()
+    cfg = load_paths_file(root)
+    # if user set project_root, rebase defaults
+    user_paths = dict(cfg.get("paths") or {})
+    if user_paths.get("project_root"):
+        root = Path(user_paths["project_root"])
+    base = _defaults(root)
+    manual = bool(cfg.get("manual_override", True))
+    resolved = dict(base)
+    for k, v in user_paths.items():
+        if v is None:
+            continue
+        v = str(v).strip()
+        if not v:
+            continue
+        if manual or k not in base:
+            resolved[k] = v
+    # normalize separators for display/storage consistency
+    for k, v in list(resolved.items()):
+        if k.startswith("web_"):
+            continue
+        resolved[k] = str(Path(v))
+    return resolved
+
+
+def ensure_path_dirs(resolved: Dict[str, str]) -> None:
+    for key in (
+        "data_local",
+        "data_csv_raw",
+        "data_hist",
+        "features_dir",
+        "models_dir",
+        "scripts_dir",
+        "pipeline_dir",
+        "logs_dir",
+        "runs_dir",
+        "state_dir",
+        "production_dir",
+        "bridge_dir",
+    ):
+        p = Path(resolved[key])
+        p.mkdir(parents=True, exist_ok=True)
+
+
+def print_path_map(resolved: Optional[Dict[str, str]] = None) -> None:
+    resolved = resolved or resolve_paths()
+    print("[FXJEFE-PATHS] Resolved path map:", flush=True)
+    for k in sorted(resolved.keys()):
+        print(f"  {k:20} = {resolved[k]}", flush=True)
+
+
+def get_script_io(script_id: str, root: Optional[Path] = None) -> Dict[str, Any]:
+    cfg = load_paths_file(root)
+    scripts = (cfg.get("script_io") or {}).get("scripts") or {}
+    return scripts.get(script_id, {"inputs": [], "outputs": []})
+
+
+if __name__ == "__main__":
+    r = resolve_paths()
+    ensure_path_dirs(r)
+    print_path_map(r)
+

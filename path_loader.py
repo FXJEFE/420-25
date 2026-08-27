@@ -25,20 +25,29 @@ def _home() -> Path:
 
 
 def default_project_root() -> Path:
-    return _home() / "Documents" / "FXJEFE_Project"
+    env = os.environ.get("FXJEFE_PROJECT_ROOT")
+    if env and env.strip():
+        return Path(env.strip()).expanduser().resolve(strict=False)
+    return (_home() / "Documents" / "FXJEFE_Project").resolve(strict=False)
 
 
 def _defaults(root: Path) -> Dict[str, str]:
+    if sys.platform == "win32":
+        venv_py = root / "venv" / "Scripts" / "python.exe"
+    else:
+        venv_py = root / "venv" / "bin" / "python"
+    py_exe = str(venv_py) if venv_py.is_file() else sys.executable
     return {
         "project_root": str(root),
-        "python_executable": sys.executable,
+        "python_executable": py_exe,
         "venv_dir": str(root / "venv"),
         "data_local": str(root / "data"),
         "data_csv_raw": str(root / "data" / "raw_ohlcv"),
         "data_hist": str(root / "data" / "hist"),
         "features_dir": str(root / "features"),
         "models_dir": str(root / "models"),
-        "scripts_dir": str(root / "pipeline" / "stages"),
+        "og_models_dir": str(_home() / "Documents" / "models"),
+        "scripts_dir": str(_home() / "Documents"),
         "pipeline_dir": str(root / "pipeline"),
         "bridge_dir": str(root / "bridge"),
         "logs_dir": str(root / "logs"),
@@ -46,9 +55,9 @@ def _defaults(root: Path) -> Dict[str, str]:
         "state_dir": str(root / "state"),
         "production_dir": str(root / "production"),
         "mt5_raw_ohlcv": str(root / "data" / "raw_ohlcv"),
-        "web_predict_url": os.environ.get("FXJEFE_PREDICT_URL", "http://127.0.0.1:8000/predict"),
-        "web_health_url": os.environ.get("FXJEFE_BRIDGE_URL", "http://127.0.0.1:8000/health"),
-        "web_sentiment_url": os.environ.get("FXJEFE_SENTIMENT_URL", "http://127.0.0.1:8000/sentiment"),
+        "web_predict_url": os.environ.get("FXJEFE_PREDICT_URL", "http://127.0.0.1:8080/predict"),
+        "web_health_url": os.environ.get("FXJEFE_BRIDGE_URL", "http://127.0.0.1:8080/health"),
+        "web_sentiment_url": os.environ.get("FXJEFE_SENTIMENT_URL", "http://127.0.0.1:8080/sentiment"),
         "io_manifest": str(root / "config" / "script_io.json"),
     }
 
@@ -104,6 +113,7 @@ def ensure_path_dirs(resolved: Dict[str, str]) -> None:
         "data_hist",
         "features_dir",
         "models_dir",
+        "og_models_dir",
         "scripts_dir",
         "pipeline_dir",
         "logs_dir",
@@ -133,3 +143,4 @@ if __name__ == "__main__":
     r = resolve_paths()
     ensure_path_dirs(r)
     print_path_map(r)
+

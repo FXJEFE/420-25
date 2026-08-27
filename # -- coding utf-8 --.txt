@@ -1,0 +1,85 @@
+# -*- coding: utf-8 -*-
+"""
+FXJEFE Feature Registry — PERSISTENT 2025OG contract
+These lists are the exact order the original models were trained on.
+NEVER reorder, rename, or insert features into the OG lists.
+"""
+from __future__ import annotations
+from typing import List, Dict
+
+# ============================================================
+# ORIGINAL 2025 WORKING MODELS — BYTE-FOR-BYTE
+# ============================================================
+
+# XGBOOST_model.json family (7–9 features)
+FEATURES_OG_7_9: List[str] = [
+    "price",
+    "atr",
+    "ema_diff",
+    "rsi",
+    "macd_diff",
+    "bb_position",
+    "roc",
+    "stochastic",
+    "cci",
+]
+
+# my_model.pkl / ensemble family (27 if price is omitted in some configs, 28 with price)
+FEATURES_OG_27_28: List[str] = [
+    "price",
+    "atr",
+    "ema_diff",
+    "rsi",
+    "garch_vol",
+    "macd_diff",
+    "vwap",
+    "price_vwap_diff",
+    "bb_position",
+    "roc",
+    "stochastic",
+    "cci",
+    "williams",
+    "momentum",
+    "realized_vol",
+    "chaikin_vol",
+    "adx",
+    "rvi",
+    "obv",
+    "volume_delta",
+    "ad_line",
+    "vol_osc",
+    "supertrend",
+    "hma",
+    "ichimoku_tenkan",
+    "sar",
+    "dpo",
+    "spread",
+]
+
+# Live predict contract used by the golden server (first 17 of the 28)
+FEATURES_PREDICT_17: List[str] = FEATURES_OG_27_28[:17]
+
+MIN_CONFIDENCE = 0.77
+MAX_CONFIDENCE = 0.9888
+
+REGISTRY: Dict[str, Dict] = {
+    "og_7_9": {
+        "train": FEATURES_OG_7_9,
+        "predict": FEATURES_OG_7_9,
+        "min_confidence": MIN_CONFIDENCE,
+    },
+    "og_27_28": {
+        "train": FEATURES_OG_27_28,
+        "predict": FEATURES_PREDICT_17,
+        "min_confidence": MIN_CONFIDENCE,
+    },
+    "v1_april2025": {
+        "train": FEATURES_OG_27_28,
+        "predict": FEATURES_PREDICT_17,
+        "min_confidence": MIN_CONFIDENCE,
+        "max_confidence": MAX_CONFIDENCE,
+    },
+}
+
+def get_features(version: str = "og_27_28", mode: str = "predict") -> List[str]:
+    return list(REGISTRY[version][mode])

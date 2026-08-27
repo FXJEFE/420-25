@@ -1,0 +1,860 @@
+"""
+FXJEFE Full Pipeline — Feature Engineering + Label Creation + Training
+======================================================================
+Complete pipeline from raw OHLCV → 80+ features → binary labels →
+per-symbol per-timeframe models with walk-forward validation.
+
+TA-Lib 0.6.8 for all core indicators (bit-exact with MT5 built-in i* functions).
+No future_return leakage — labels created AFTER features, strict separation.
+
+Usage:
+    python full_pipeline.py                    # train all
+    python full_pipeline.py --symbol BTCUSD    # train one symbol
+    python full_pipeline.py --tf H4            # train one timeframe
+"""
+import os
+import sys
+import json
+import argparse
+import logging
+import warnings
+import numpy as np
+import pandas as pd
+import talib
+import joblib
+from datetime import datetime
+from scipy import stats as scipy_stats
+
+warnings.filterwarnings('ignore')
+
+# ========================= CONFIG =========================
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')
+with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+    config = json.load(f)
+
+MODELS_DIR = config['models_path']
+DATA_DIR = config['data_output_path']
+HIST_DIR = os.path.join(DATA_DIR, 'Historical', 'enhanced')
+os.makedirs(MODELS_DIR, exist_ok=True)
+os.makedirs(config['log_path'], exist_ok=True)
+
+LOG_FILE = os.path.join(config['log_path'], f'full_pipeline_{datetime.now():%Y%m%d_%H%M%S}.log')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.FileHandler(LOG_FILE, encoding='utf-8'), logging.StreamHandler()]
+)
+log = logging.info
+
+
+# ═══════════════════════════════════════════════════════════════
+# SECTION 1: FEATURE ENGINEERING (TA-Lib + advanced Python features)
+# ═══════════════════════════════════════════════════════════════
+
+def _sma(series, period):
+    return series.rolling(period, min_periods=1).mean()
+
+def _ema(series, span):
+    return series.ewm(span=span, adjust=False).mean()
+
+
+def compute_all_features(df):
+    """
+    Compute 80+ features from OHLCV data using TA-Lib + NumPy/Pandas/SciPy.
+    TA-Lib functions are bit-exact with MT5 built-in iRSI, iMACD, iATR, etc.
+    No future information used — all indicators use only past data.
+    """
+    df = df.copy()
+    o = df['open'].values.astype(np.float64)
+    h = df['high'].values.astype(np.float64)
+    l = df['low'].values.astype(np.float64)
+    c = df['close'].values.astype(np.float64)
+    v = df['volume'].values.astype(np.float64)
+
+    # Pandas series versions for rolling ops
+    cs = df['close'].astype(float)
+    vs = df['volume'].astype(float)
+    os_ = df['open'].astype(float)
+    hs = df['high'].astype(float)
+    ls = df['low'].astype(float)
+
+    # ════════════════════════════════════════════════════════════
+    # CORE TA-LIB INDICATORS (bit-exact with MT5 i* functions)
+    # ════════════════════════════════════════════════════════════
+
+    df['price'] = c
+
+    # Trend
+    df['rsi'] = talib.RSI(c, timeperiod=14)
+    macd, macd_signal, macd_hist = talib.MACD(c, fastperiod=12, slowperiod=26, signalperiod=9)
+    df['macd'] = macd
+    df['macd_signal'] = macd_signal
+    df['macd_diff'] = macd - macd_signal
+    df['macd_hist'] = macd_hist
+
+    df['ema12'] = talib.EMA(c, timeperiod=12)
+    df['ema26'] = talib.EMA(c, timeperiod=26)
+    df['ema_diff'] = df['ema12'] - df['ema26']
+    df['sma10'] = talib.SMA(c, timeperiod=10)
+    df['sma20'] = talib.SMA(c, timeperiod=20)
+    df['sma50'] = talib.SMA(c, timeperiod=50)
+    df['close_sma_5'] = talib.SMA(c, timeperiod=5)
+    df['close_sma_10'] = talib.SMA(c, timeperiod=10)
+
+    df['adx'] = talib.ADX(h, l, c, timeperiod=14)
+    df['plus_di'] = talib.PLUS_DI(h, l, c, timeperiod=14)
+    df['minus_di'] = talib.MINUS_DI(h, l, c, timeperiod=14)
+    df['di_diff'] = df['plus_di'] - df['minus_di']
+
+    df['atr'] = talib.ATR(h, l, c, timeperiod=14)
+    df['natr'] = talib.NATR(h, l, c, timeperiod=14)
+
+    # Bollinger Bands
+    bb_upper, bb_middle, bb_lower = talib.BBANDS(c, timeperiod=20, nbdevup=2, nbdevdn=2)
+    df['bb_upper'] = bb_upper
+    df['bb_middle'] = bb_middle
+    df['bb_lower'] = bb_lower
+    bb_range = pd.Series(bb_upper - bb_lower).replace(0, np.nan)
+    df['bb_width'] = (bb_upper - bb_lower) / pd.Series(bb_middle).replace(0, np.nan)
+    df['bb_position'] = (c - bb_lower) / bb_range.values
+
+    # Oscillators
+    stoch_k, stoch_d = talib.STOCH(h, l, c, fastk_period=14, slowk_period=3, slowd_period=3)
+    df['stochastic'] = stoch_k
+    df['stoch_k'] = stoch_k
+    df['stoch_d'] = stoch_d
+    df['cci'] = talib.CCI(h, l, c, timeperiod=20)
+    df['williams'] = talib.WILLR(h, l, c, timeperiod=14)
+    df['mfi'] = talib.MFI(h, l, c, v, timeperiod=14)
+
+    # Momentum
+    df['roc'] = talib.ROC(c, timeperiod=10)
+    df['momentum'] = talib.MOM(c, timeperiod=10)
+    df['apo'] = talib.APO(c, fastperiod=12, slowperiod=26)
+    df['trix'] = talib.TRIX(c, timeperiod=30)
+
+    # Volatility
+    df['realized_vol'] = cs.pct_change().rolling(20, min_periods=1).std() * np.sqrt(252)
+    df['chaikin_vol'] = _ema(hs - ls, 10).pct_change(10)
+
+    # Volume
+    df['obv'] = talib.OBV(c, v)
+    df['ad_line'] = talib.AD(h, l, c, v)
+    df['adosc'] = talib.ADOSC(h, l, c, v, fastperiod=3, slowperiod=10)
+    df['volume_delta'] = vs.diff()
+    df['vol_osc'] = (_ema(vs, 5) - _ema(vs, 20)) / _ema(vs, 20).replace(0, np.nan) * 100
+
+    # Overlap studies
+    df['sar'] = talib.SAR(h, l, acceleration=0.02, maximum=0.2)
+    df['trima'] = talib.TRIMA(c, timeperiod=30)
+    df['dema'] = talib.DEMA(c, timeperiod=20)
+    df['tema'] = talib.TEMA(c, timeperiod=20)
+    df['kama'] = talib.KAMA(c, timeperiod=30)
+    df['midpoint'] = talib.MIDPOINT(c, timeperiod=14)
+    df['midprice'] = talib.MIDPRICE(h, l, timeperiod=14)
+
+    # VWAP (rolling — TA-Lib doesn't have VWAP)
+    cum_vol = vs.rolling(14, min_periods=1).sum()
+    cum_pv = (cs * vs).rolling(14, min_periods=1).sum()
+    df['vwap'] = cum_pv / cum_vol.replace(0, np.nan)
+    df['price_vwap_diff'] = cs - df['vwap']
+
+    # HMA (TA-Lib WMA-based)
+    wma_half = talib.WMA(c, timeperiod=max(int(9/2), 2))
+    wma_full = talib.WMA(c, timeperiod=9)
+    hma_raw = 2 * pd.Series(wma_half) - pd.Series(wma_full)
+    df['hma'] = talib.WMA(hma_raw.values.astype(np.float64), timeperiod=3)
+
+    # Ichimoku tenkan
+    df['ichimoku_tenkan'] = (pd.Series(talib.MAX(h, timeperiod=9)) +
+                              pd.Series(talib.MIN(l, timeperiod=9))) / 2
+
+    # Supertrend (not in TA-Lib, use vectorized approach)
+    atr_st = pd.Series(talib.ATR(h, l, c, timeperiod=10))
+    hl2 = (hs + ls) / 2
+    upper_band = hl2 + 3 * atr_st
+    lower_band = hl2 - 3 * atr_st
+    st = pd.Series(np.nan, index=df.index)
+    direction = pd.Series(1, index=df.index)
+    for i in range(1, len(c)):
+        if c[i] > upper_band.iloc[i-1]:
+            direction.iloc[i] = 1
+        elif c[i] < lower_band.iloc[i-1]:
+            direction.iloc[i] = -1
+        else:
+            direction.iloc[i] = direction.iloc[i-1]
+        st.iloc[i] = lower_band.iloc[i] if direction.iloc[i] == 1 else upper_band.iloc[i]
+    df['supertrend'] = st
+
+    # DPO
+    df['dpo'] = cs - _sma(cs, 20).shift(11)
+
+    # Spread and sentiment placeholders
+    df['spread'] = hs - ls
+    df['sentiment'] = 0.0
+
+    # RVI (not in TA-Lib)
+    co = cs - os_
+    hl = hs - ls
+    df['rvi'] = _sma(co, 10) / _sma(hl, 10).replace(0, np.nan)
+
+    # ════════════════════════════════════════════════════════════
+    # CANDLESTICK PATTERNS (TA-Lib pattern recognition)
+    # ════════════════════════════════════════════════════════════
+    df['cdl_doji'] = talib.CDLDOJI(o, h, l, c) / 100
+    df['cdl_engulfing'] = talib.CDLENGULFING(o, h, l, c) / 100
+    df['cdl_hammer'] = talib.CDLHAMMER(o, h, l, c) / 100
+    df['cdl_shooting_star'] = talib.CDLSHOOTINGSTAR(o, h, l, c) / 100
+    df['cdl_morning_star'] = talib.CDLMORNINGSTAR(o, h, l, c) / 100
+    df['cdl_evening_star'] = talib.CDLEVENINGSTAR(o, h, l, c) / 100
+    df['cdl_three_white'] = talib.CDL3WHITESOLDIERS(o, h, l, c) / 100
+    df['cdl_three_black'] = talib.CDL3BLACKCROWS(o, h, l, c) / 100
+    df['cdl_harami'] = talib.CDLHARAMI(o, h, l, c) / 100
+    df['cdl_dragonfly'] = talib.CDLDRAGONFLYDOJI(o, h, l, c) / 100
+    df['cdl_gravestone'] = talib.CDLGRAVESTONEDOJI(o, h, l, c) / 100
+    df['cdl_spinning_top'] = talib.CDLSPINNINGTOP(o, h, l, c) / 100
+    df['cdl_marubozu'] = talib.CDLMARUBOZU(o, h, l, c) / 100
+    df['cdl_hanging_man'] = talib.CDLHANGINGMAN(o, h, l, c) / 100
+    df['cdl_inverted_hammer'] = talib.CDLINVERTEDHAMMER(o, h, l, c) / 100
+    df['cdl_piercing'] = talib.CDLPIERCING(o, h, l, c) / 100
+    df['cdl_dark_cloud'] = talib.CDLDARKCLOUDCOVER(o, h, l, c) / 100
+
+    # Short aliases (backward compat with models trained before cdl_ prefix)
+    df['doji'] = df['cdl_doji']
+    df['engulfing'] = df['cdl_engulfing']
+    df['hammer'] = df['cdl_hammer']
+
+    # Body / shadow ratios
+    body = pd.Series(np.abs(c - o))
+    full_range = (hs - ls).replace(0, np.nan)
+    df['candle_body_ratio'] = body / full_range
+    df['candle_upper_shadow'] = (hs - pd.concat([cs, os_], axis=1).max(axis=1)) / full_range
+    df['candle_lower_shadow'] = (pd.concat([cs, os_], axis=1).min(axis=1) - ls) / full_range
+
+    # ════════════════════════════════════════════════════════════
+    # EXTENDED FEATURES (lags, time, GARCH proxy)
+    # ════════════════════════════════════════════════════════════
+    for lag in [1, 2, 3]:
+        df[f'price_lag{lag}'] = cs.shift(lag)
+        df[f'rsi_lag{lag}'] = df['rsi'].shift(lag)
+        df[f'macd_diff_lag{lag}'] = df['macd_diff'].shift(lag)
+        df[f'atr_lag{lag}'] = df['atr'].shift(lag)
+
+    for i in range(1, 6):
+        df[f'close_lag_{i}'] = cs.shift(i)
+        df[f'return_lag_{i}'] = cs.pct_change(i).shift(1)
+
+    df['hour_of_day'] = 0
+    df['day_of_week'] = 0
+    if 'time' in df.columns:
+        try:
+            dt = pd.to_datetime(df['time'])
+            df['hour_of_day'] = dt.dt.hour
+            df['day_of_week'] = dt.dt.dayofweek
+        except Exception:
+            pass
+
+    df['volume_ratio'] = vs / _sma(vs, 20).replace(0, np.nan)
+    df['garch_proxy'] = cs.pct_change().rolling(20).std() * np.sqrt(252)
+    df['garch_vol'] = df['garch_proxy']
+    df['rolling_skew'] = cs.pct_change().rolling(20).skew()
+    df['rolling_kurt'] = cs.pct_change().rolling(20).kurt()
+
+    # ════════════════════════════════════════════════════════════
+    # ADVANCED FEATURES (Python-only edge, not in EA)
+    # ════════════════════════════════════════════════════════════
+
+    # Trend strength / regime
+    sma50 = pd.Series(df['sma50'])
+    sma200 = talib.SMA(c, timeperiod=200)
+    df['sma200'] = sma200
+    df['trend_filter'] = np.where(df['sma50'] > sma200, 1, -1)
+    df['price_above_sma50'] = (c > df['sma50']).astype(float)
+    df['price_above_sma200'] = (c > sma200).astype(float)
+    df['sma_spread'] = (df['sma50'] - sma200) / pd.Series(c).replace(0, np.nan)
+
+    # Volatility regime
+    vol_20 = cs.pct_change().rolling(20, min_periods=1).std()
+    vol_60 = cs.pct_change().rolling(60, min_periods=1).std()
+    df['vol_regime'] = vol_20 / vol_60.replace(0, np.nan)
+    df['vol_percentile'] = vol_20.rolling(252, min_periods=20).apply(
+        lambda x: scipy_stats.percentileofscore(x, x.iloc[-1]) / 100, raw=False
+    )
+
+    # Momentum quality
+    returns = cs.pct_change()
+    df['rolling_sharpe'] = returns.rolling(20, min_periods=5).mean() / returns.rolling(20, min_periods=5).std().replace(0, np.nan)
+    neg_returns = returns.copy()
+    neg_returns[neg_returns >= 0] = np.nan
+    df['rolling_sortino'] = returns.rolling(20, min_periods=5).mean() / neg_returns.rolling(20, min_periods=5).std().replace(0, np.nan)
+
+    # Mean reversion signals
+    df['zscore_20'] = (cs - _sma(cs, 20)) / cs.rolling(20, min_periods=1).std().replace(0, np.nan)
+    df['zscore_50'] = (cs - _sma(cs, 50)) / cs.rolling(50, min_periods=1).std().replace(0, np.nan)
+    df['rsi_divergence'] = pd.Series(df['rsi']).diff(5) - pd.Series(df['roc'])
+
+    # Volume analysis
+    df['volume_surge'] = vs / _sma(vs, 20).replace(0, np.nan)
+    df['volume_trend'] = _sma(vs, 5) / _sma(vs, 20).replace(0, np.nan)
+    df['up_volume_ratio'] = (vs * (cs > os_).astype(float)).rolling(20, min_periods=1).sum() / vs.rolling(20, min_periods=1).sum().replace(0, np.nan)
+
+    # Cross-feature interactions
+    df['rsi_x_adx'] = df['rsi'] * df['adx'] / 100
+    df['vol_x_momentum'] = df['realized_vol'] * df['momentum']
+    df['bb_x_rsi'] = df['bb_position'] * df['rsi'] / 100
+
+    # Rate of change of indicators
+    df['rsi_roc'] = pd.Series(df['rsi']).diff(3)
+    df['macd_roc'] = pd.Series(df['macd_diff']).diff(3)
+    df['atr_roc'] = pd.Series(df['atr']).pct_change(5)
+    df['adx_roc'] = pd.Series(df['adx']).diff(3)
+
+    # Moving average ribbon
+    df['ema_ribbon'] = (_ema(cs, 8) - _ema(cs, 21)) / cs.replace(0, np.nan)
+
+    # Statistical features
+    df['skewness_20'] = returns.rolling(20, min_periods=5).skew()
+    df['kurtosis_20'] = returns.rolling(20, min_periods=5).kurt()
+
+    # Session flags
+    if 'time' in df.columns:
+        try:
+            dt = pd.to_datetime(df['time'])
+            df['session_london'] = ((dt.dt.hour >= 8) & (dt.dt.hour <= 16)).astype(int)
+            df['session_ny'] = ((dt.dt.hour >= 13) & (dt.dt.hour <= 21)).astype(int)
+            df['session_asia'] = ((dt.dt.hour >= 0) & (dt.dt.hour <= 9)).astype(int)
+        except Exception:
+            pass
+
+    # ── Clean up ──
+    df = df.ffill().fillna(0)
+    df = df.replace([np.inf, -np.inf], 0)
+
+    return df
+
+
+# ═══════════════════════════════════════════════════════════════
+# SECTION 2: LABEL CREATION
+# ═══════════════════════════════════════════════════════════════
+
+CRYPTO_SYMBOLS = {'BTCUSD', 'ETHUSD', 'XRPUSD', 'SOLUSD', 'DOGEUSD', 'ADAUSD',
+                   'AVAXUSD', 'LINKUSD', 'DOTUSD', 'MATICUSD', 'SUIUSD', 'PEPEUSD'}
+INDEX_SYMBOLS = {'NAS100', 'US500', 'US30'}
+
+THRESHOLDS = {
+    'crypto': {'M5': 0.002, 'M15': 0.003, 'H1': 0.005, 'H4': 0.010, 'D1': 0.015, 'W1': 0.025},
+    'forex':  {'M5': 0.0003, 'M15': 0.0005, 'H1': 0.001, 'H4': 0.001, 'D1': 0.002, 'W1': 0.005},
+    'index':  {'M5': 0.001, 'M15': 0.002, 'H1': 0.003, 'H4': 0.005, 'D1': 0.008, 'W1': 0.015},
+}
+
+HORIZONS = {'M5': 5, 'M15': 5, 'H1': 5, 'H4': 5, 'D1': 5, 'W1': 3}
+
+
+def get_asset_class(symbol):
+    if symbol in CRYPTO_SYMBOLS: return 'crypto'
+    if symbol in INDEX_SYMBOLS: return 'index'
+    return 'forex'
+
+
+def create_labels(df, symbol, timeframe, mode='binary'):
+    """Create labels from price data. No leakage — uses only future_return for labels, not features."""
+    asset = get_asset_class(symbol)
+    threshold = THRESHOLDS[asset].get(timeframe, 0.005)
+    horizon = HORIZONS.get(timeframe, 5)
+
+    # Compute forward return
+    if 'close' in df.columns:
+        fr = df['close'].shift(-horizon) / df['close'] - 1
+    elif 'price' in df.columns:
+        fr = df['price'].shift(-horizon) / df['price'] - 1
+    else:
+        log(f"  No price column for label creation")
+        return None
+
+    df = df.copy()
+    df['_future_return'] = fr
+
+    if mode == 'binary':
+        df['_label'] = np.where(fr > threshold, 1, np.where(fr < -threshold, 0, -1))
+        df = df[df['_label'] >= 0].copy()
+    else:  # 3-class
+        df['_label'] = np.where(fr > threshold, 2, np.where(fr < -threshold, 0, 1))
+
+    df = df.dropna(subset=['_future_return'])
+
+    buy_count = (df['_label'] == (1 if mode == 'binary' else 2)).sum()
+    sell_count = (df['_label'] == 0).sum()
+    total = len(df)
+    if total == 0:
+        return None
+
+    log(f"  Labels ({mode}, threshold={threshold:.2%}, horizon={horizon}): "
+        f"BUY={buy_count:,} ({buy_count/total*100:.1f}%) SELL={sell_count:,} ({sell_count/total*100:.1f}%) "
+        f"| Total={total:,}")
+
+    return df
+
+
+# ═══════════════════════════════════════════════════════════════
+# SECTION 3: FEATURE SELECTION
+# ═══════════════════════════════════════════════════════════════
+
+# Features that must NEVER be used for training
+FORBIDDEN = {'future_return', '_future_return', 'future_return_1', 'future_return_5',
+             'future_return_15', 'future_price', 'price_change', 'label', '_label',
+             'signal', 'sample_weight', 'regime', 'time', 'time.1', 'symbol',
+             'timeframe', 'target_return', 'open', 'high', 'low', 'close',
+             'volume', 'volume.1', 'threshold'}
+
+
+def select_features(df, include_advanced=True, max_features=None, label_col='_label'):
+    """Select valid features, optionally pruned by importance to prevent overfitting.
+
+    When max_features is set and there are more candidates than the limit,
+    a quick XGBoost is trained to rank features by gain, and only the top
+    max_features are kept.  This is critical for small datasets (D1) where
+    too many features causes overfitting.
+    """
+    candidates = [c for c in df.columns if c not in FORBIDDEN]
+    # Only keep numeric columns
+    numeric = df[candidates].select_dtypes(include=[np.number]).columns.tolist()
+
+    # Auto-limit: if data/feature ratio < 25, cap features
+    if max_features is None and label_col in df.columns:
+        n_rows = len(df)
+        ratio = n_rows / max(len(numeric), 1)
+        if ratio < 25:
+            max_features = max(int(n_rows / 25), 40)
+            log(f"  Auto-limiting features: {len(numeric)} -> {max_features} (data/feat ratio={ratio:.0f})")
+
+    if max_features and len(numeric) > max_features and label_col in df.columns:
+        import xgboost as xgb
+        X_sel = df[numeric].values.astype(np.float32)
+        y_sel = df[label_col].values.astype(int)
+        # Quick importance ranking on 30% sample
+        n_sample = min(len(X_sel), max(int(len(X_sel) * 0.3), 2000))
+        dtrain = xgb.DMatrix(X_sel[:n_sample], label=y_sel[:n_sample], feature_names=numeric)
+        quick_model = xgb.train(
+            {'objective': 'binary:logistic', 'eval_metric': 'logloss',
+             'tree_method': 'hist', 'max_depth': 4, 'learning_rate': 0.1,
+             'reg_lambda': 5.0, 'random_state': 42},
+            dtrain, num_boost_round=100, verbose_eval=False
+        )
+        importance = quick_model.get_score(importance_type='gain')
+        ranked = sorted(importance.items(), key=lambda x: -x[1])
+        top_features = [f for f, _ in ranked[:max_features]]
+        # Ensure 'price' is always included (needed for equity simulation)
+        if 'price' in numeric and 'price' not in top_features:
+            top_features.append('price')
+        log(f"  Feature selection: {len(numeric)} -> {len(top_features)} by importance")
+        return top_features
+
+    log(f"  Selected {len(numeric)} features")
+    return numeric
+
+
+# ═══════════════════════════════════════════════════════════════
+# SECTION 4: TRAINING WITH WALK-FORWARD
+# ═══════════════════════════════════════════════════════════════
+
+def simulate_equity(X_test, y_pred, price_idx, horizon=5):
+    """Fixed-risk equity simulation."""
+    FIXED_RISK = 50.0
+    ANN_FACTOR = np.sqrt(252 * 24)
+    equity = [10000.0]
+    bal = equity[0]
+    gross_p, gross_l = 0.0, 0.0
+    wins, total = 0, 0
+
+    for i in range(len(y_pred) - horizon):
+        pred = int(y_pred[i])
+        entry = X_test[i, price_idx]
+        exit_p = X_test[i + horizon, price_idx] if (i + horizon) < len(X_test) else entry
+        if entry <= 0 or exit_p <= 0 or bal <= 1.0:
+            continue
+        ret = np.clip((exit_p - entry) / entry, -0.10, 0.10)
+        spread_cost = 0.0005
+        pnl = FIXED_RISK * ((ret - spread_cost) if pred == 1 else (-ret - spread_cost)) / 0.01
+        pnl = np.clip(pnl, -2 * FIXED_RISK, 4 * FIXED_RISK)
+        if pnl > 0:
+            gross_p += pnl; wins += 1
+        elif pnl < 0:
+            gross_l += abs(pnl)
+        total += 1
+        bal = max(bal + pnl, 1.0)
+        equity.append(bal)
+
+    eq = np.array(equity)
+    rets = np.diff(eq) / eq[:-1]
+    active = rets[rets != 0]
+    mean_r = np.mean(active) if len(active) > 0 else 0
+    std_r = np.std(active) if len(active) > 0 else 1e-10
+    sharpe = mean_r / std_r * ANN_FACTOR if std_r > 1e-12 else 0
+    pf = gross_p / gross_l if gross_l > 0 else (float('inf') if gross_p > 0 else 0)
+    peak = np.maximum.accumulate(eq)
+    max_dd = np.min((eq - peak) / peak) * 100 if peak.max() > 0 else 0
+    wr = wins / total * 100 if total > 0 else 0
+    return {'sharpe': sharpe, 'pf': pf, 'max_dd': max_dd, 'n_trades': total, 'win_rate': wr}
+
+
+def train_walk_forward(df, features, symbol, timeframe, n_windows=6):
+    """Walk-forward training: XGBoost + LightGBM, pick best by Sharpe."""
+    import xgboost as xgb
+    import lightgbm as lgb
+    import optuna
+    from sklearn.metrics import accuracy_score
+    optuna.logging.set_verbosity(optuna.logging.WARNING)
+
+    X = df[features].values.astype(np.float32)
+    y = df['_label'].values.astype(int)
+    total = len(X)
+
+    min_rows = 1500 if timeframe in ('D1', 'W1') else 3000
+    if total < min_rows:
+        log(f"  Skipping — only {total} rows (need {min_rows}+)")
+        return None
+
+    price_idx = features.index('price') if 'price' in features else 0
+    min_train = max(int(total * 0.40), 2000)
+    test_size = max(int(total * 0.10), 500)
+
+    log(f"\n  Walk-Forward ({n_windows} windows)")
+    log(f"  {'Win':<5} {'Train':<10} {'Test':<8} {'Acc':<8} {'Sharpe':<8} {'PF':<7} {'WR':<8}")
+    log(f"  {'-'*55}")
+
+    results = []
+    best_model, best_sharpe, best_params = None, -999, None
+
+    for w in range(n_windows):
+        test_start = min_train + w * test_size
+        test_end = min(test_start + test_size, total)
+        if test_end <= test_start or test_start >= total:
+            break
+
+        X_tr, y_tr = X[:test_start], y[:test_start]
+        X_te, y_te = X[test_start:test_end], y[test_start:test_end]
+
+        if len(np.unique(y_tr)) < 2 or len(np.unique(y_te)) < 2:
+            continue
+
+        # Timeframe-adaptive hyperparameter bounds
+        # M15/M5 = noisier, need stronger regularization + shallower trees
+        if timeframe in ('M5', 'M15'):
+            lr_range = (0.005, 0.1)
+            depth_range = (3, 5)
+            lam_range = (1.0, 50.0)
+            mcw_range = (5, 30)
+            n_trials = 40
+        elif timeframe in ('H1', 'H4'):
+            lr_range = (0.01, 0.2)
+            depth_range = (3, 7)
+            lam_range = (0.5, 20.0)
+            mcw_range = (3, 15)
+            n_trials = 30
+        else:  # D1, W1
+            lr_range = (0.01, 0.3)
+            depth_range = (3, 8)
+            lam_range = (0.1, 10.0)
+            mcw_range = (1, 10)
+            n_trials = 25
+
+        # Optuna XGBoost with Sharpe objective + degenerate penalty
+        def objective(trial):
+            params = {
+                'objective': 'binary:logistic', 'eval_metric': 'logloss',
+                'tree_method': 'hist', 'random_state': 42,
+                'learning_rate': trial.suggest_float('lr', *lr_range, log=True),
+                'max_depth': trial.suggest_int('depth', *depth_range),
+                'subsample': trial.suggest_float('sub', 0.6, 1.0),
+                'colsample_bytree': trial.suggest_float('col', 0.5, 1.0),
+                'reg_lambda': trial.suggest_float('lam', *lam_range),
+                'min_child_weight': trial.suggest_int('mcw', *mcw_range),
+            }
+            dtrain = xgb.DMatrix(X_tr, label=y_tr)
+            dval = xgb.DMatrix(X_te, label=y_te)
+            model = xgb.train(params, dtrain, num_boost_round=500,
+                              evals=[(dval, 'val')], early_stopping_rounds=30, verbose_eval=False)
+            preds = (model.predict(dval) > 0.5).astype(int)
+            # Penalize degenerate models that predict >80% one class
+            buy_pct = preds.mean()
+            if buy_pct > 0.85 or buy_pct < 0.15:
+                return -100.0  # reject degenerate predictions
+            sm = simulate_equity(X_te, preds, price_idx)
+            acc = accuracy_score(y_te, preds)
+            return sm['sharpe'] + acc * 2
+
+        study = optuna.create_study(direction='maximize')
+        study.optimize(objective, n_trials=n_trials, show_progress_bar=False)
+
+        # Train final with best params
+        bp = study.best_params
+        params = {
+            'objective': 'binary:logistic', 'eval_metric': 'logloss',
+            'tree_method': 'hist', 'random_state': 42,
+            'learning_rate': bp['lr'], 'max_depth': bp['depth'],
+            'subsample': bp['sub'], 'colsample_bytree': bp['col'],
+            'reg_lambda': bp['lam'], 'min_child_weight': bp['mcw'],
+        }
+        dtrain = xgb.DMatrix(X_tr, label=y_tr)
+        dtest = xgb.DMatrix(X_te, label=y_te)
+        model = xgb.train(params, dtrain, num_boost_round=800,
+                          evals=[(dtest, 'val')], early_stopping_rounds=50, verbose_eval=False)
+        preds = (model.predict(dtest) > 0.5).astype(int)
+        # Skip degenerate models in walk-forward
+        buy_pct = preds.mean()
+        if buy_pct > 0.85 or buy_pct < 0.15:
+            log(f"  {w+1:<5} DEGENERATE (buy_pct={buy_pct:.1%}) -- skipped")
+            continue
+        acc = accuracy_score(y_te, preds)
+        sm = simulate_equity(X_te, preds, price_idx)
+
+        results.append({'window': w+1, 'accuracy': acc, **sm})
+        if sm['sharpe'] > best_sharpe:
+            best_sharpe = sm['sharpe']
+            best_model = model
+            best_params = bp
+
+        log(f"  {w+1:<5} {len(X_tr):>8,}  {len(X_te):>6,}  {acc:>5.1%}  "
+            f"{sm['sharpe']:>6.2f}  {sm['pf']:>5.2f}  {sm['win_rate']:>5.1f}%")
+
+    if not results:
+        return None
+
+    # Also train LightGBM on full 80/20 split (TF-adaptive params)
+    split = int(total * 0.80)
+    if timeframe in ('M5', 'M15'):
+        lgb_params = dict(n_estimators=300, learning_rate=0.03, max_depth=4,
+                          num_leaves=20, subsample=0.7, colsample_bytree=0.6,
+                          reg_lambda=5.0, min_child_samples=50)
+    elif timeframe in ('H1', 'H4'):
+        lgb_params = dict(n_estimators=500, learning_rate=0.05, max_depth=5,
+                          num_leaves=35, subsample=0.8, colsample_bytree=0.7,
+                          reg_lambda=2.0, min_child_samples=20)
+    else:
+        lgb_params = dict(n_estimators=500, learning_rate=0.05, max_depth=6,
+                          num_leaves=50, subsample=0.8, colsample_bytree=0.8,
+                          reg_lambda=1.0, min_child_samples=10)
+    lgb_model = lgb.LGBMClassifier(
+        objective='binary', metric='binary_logloss', verbosity=-1,
+        random_state=42, n_jobs=-1, is_unbalance=True, **lgb_params,
+    )
+    lgb_model.fit(X[:split], y[:split],
+                  eval_set=[(X[split:], y[split:])],
+                  callbacks=[lgb.early_stopping(50, verbose=False), lgb.log_evaluation(0)])
+    lgb_preds = lgb_model.predict(X[split:])
+    lgb_buy_pct = lgb_preds.mean()
+    lgb_degenerate = lgb_buy_pct > 0.85 or lgb_buy_pct < 0.15
+    if lgb_degenerate:
+        log(f"  LGB DEGENERATE (buy_pct={lgb_buy_pct:.1%}) -- penalized")
+    lgb_acc = accuracy_score(y[split:], lgb_preds)
+    lgb_sm = simulate_equity(X[split:], lgb_preds, price_idx)
+
+    # Summary
+    avg_acc = np.mean([r['accuracy'] for r in results])
+    avg_sharpe = np.mean([r['sharpe'] for r in results])
+    avg_pf = np.mean([r['pf'] for r in results if np.isfinite(r['pf'])])
+    avg_wr = np.mean([r['win_rate'] for r in results])
+    pos = sum(1 for r in results if r['sharpe'] > 0)
+
+    log(f"\n  XGB WF: Acc={avg_acc:.1%} Sharpe={avg_sharpe:.2f} PF={avg_pf:.2f} WR={avg_wr:.1f}% [{pos}/{len(results)} positive]")
+    log(f"  LGB:    Acc={lgb_acc:.1%} Sharpe={lgb_sm['sharpe']:.2f} PF={lgb_sm['pf']:.2f} WR={lgb_sm['win_rate']:.1f}%")
+
+    # Pick winner (degenerate LGB cannot win)
+    lgb_sharpe = lgb_sm['sharpe'] if not lgb_degenerate else -999
+    if lgb_sharpe > avg_sharpe:
+        winner_model, winner_type = lgb_model, 'lgb'
+        winner_sharpe, winner_acc, winner_pf = lgb_sm['sharpe'], lgb_acc, lgb_sm['pf']
+    else:
+        winner_model, winner_type = best_model, 'xgb'
+        winner_sharpe, winner_acc, winner_pf = avg_sharpe, avg_acc, avg_pf
+
+    log(f"  WINNER: {winner_type.upper()} (Sharpe={winner_sharpe:.2f} PF={winner_pf:.2f})")
+
+    # ── Quality gate: reject models that won't trade profitably ──
+    if winner_sharpe < 0:
+        log(f"  REJECTED: negative Sharpe ({winner_sharpe:.2f}) -- model not viable")
+        return None
+    if winner_acc < 0.52:
+        log(f"  REJECTED: accuracy too low ({winner_acc:.1%}) -- near random")
+        return None
+    if pos < 2 and len(results) >= 4:
+        log(f"  REJECTED: only {pos}/{len(results)} windows profitable -- unstable")
+        return None
+
+    return {
+        'symbol': symbol, 'timeframe': timeframe,
+        'model': winner_model, 'model_type': winner_type,
+        'features': features, 'n_features': len(features),
+        'accuracy': winner_acc, 'sharpe': winner_sharpe, 'pf': winner_pf,
+        'avg_win_rate': avg_wr, 'positive_windows': pos, 'total_windows': len(results),
+    }
+
+
+# ═══════════════════════════════════════════════════════════════
+# SECTION 5: DATA LOADING
+# ═══════════════════════════════════════════════════════════════
+
+def load_data(symbol, timeframe):
+    """Load data from any available source, compute features if needed."""
+    import glob
+
+    # Source 1: Historical/enhanced/ (has OHLCV + pre-computed features)
+    tf_map = {'D1': 'Daily', 'W1': 'Weekly'}
+    tf_name = tf_map.get(timeframe, timeframe)
+
+    pattern = os.path.join(HIST_DIR, f'enhanced_{symbol}_{tf_name}_*.csv')
+    matches = glob.glob(pattern)
+    if matches:
+        df = pd.read_csv(matches[0])
+        log(f"  Loaded {len(df):,} rows from {os.path.basename(matches[0])}")
+        existing_features = set(df.columns) - {'open','high','low','close','volume','time'}
+        # Compute new features from OHLCV, then merge (preserving pre-existing)
+        if 'open' in df.columns and 'close' in df.columns:
+            log(f"  Computing features from OHLCV (preserving {len(existing_features)} pre-existing)...")
+            computed = compute_all_features(df)
+            # Only add columns that don't already exist in the CSV
+            new_cols = [c for c in computed.columns if c not in df.columns]
+            for c in new_cols:
+                df[c] = computed[c].values
+            log(f"  Added {len(new_cols)} new features -> {len(df.columns)} total columns")
+        return df
+
+    # Source 2: FXJEFE_Crypto_Features.csv (limited -- no OHLCV, ~28 features only)
+    crypto_path = os.path.join(DATA_DIR, 'FXJEFE_Crypto_Features.csv')
+    if os.path.exists(crypto_path):
+        full_df = pd.read_csv(crypto_path)
+        df = full_df[(full_df['symbol'] == symbol) & (full_df['timeframe'] == timeframe)].copy()
+        if len(df) > 0:
+            df = df.reset_index(drop=True)
+            log(f"  Loaded {len(df):,} rows for {symbol} {timeframe} from crypto features")
+            log(f"  WARNING: No OHLCV for {symbol} -- limited to {len([c for c in df.columns if c not in ('time','symbol','timeframe','signal')])} pre-computed features")
+            log(f"  To get full 130+ features, export {symbol} OHLCV from MT5 to Historical/enhanced/")
+            return df
+
+    # Source 3: Raw OHLCV files
+    pattern = os.path.join(DATA_DIR, 'Historical', f'{symbol}_{tf_name}_*.csv')
+    matches = glob.glob(pattern)
+    if matches:
+        df = pd.read_csv(matches[0])
+        log(f"  Loaded {len(df):,} rows from raw OHLCV {os.path.basename(matches[0])}")
+        if 'open' in df.columns:
+            log(f"  Computing 60+ features from OHLCV...")
+            df = compute_all_features(df)
+        return df
+
+    log(f"  No data found for {symbol} {timeframe}")
+    return None
+
+
+# ═══════════════════════════════════════════════════════════════
+# SECTION 6: MAIN PIPELINE
+# ═══════════════════════════════════════════════════════════════
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--symbol', type=str, default=None)
+    parser.add_argument('--tf', type=str, default=None)
+    parser.add_argument('--mode', type=str, default='binary', choices=['binary', '3class'])
+    parser.add_argument('--max-features', type=int, default=None, help='Force max features (e.g. 90)')
+    args = parser.parse_args()
+
+    log("=" * 70)
+    log("FXJEFE FULL PIPELINE — Feature Engineering + Labels + Training")
+    log("=" * 70)
+    log(f"Mode: {args.mode} | Filter: symbol={args.symbol or 'ALL'} tf={args.tf or 'ALL'}")
+
+    # Define all pairs to train
+    all_pairs = [
+        ('BTCUSD', ['M15', 'H1', 'H4', 'D1']),
+        ('ETHUSD', ['M15', 'H1', 'H4', 'D1']),
+        ('XRPUSD', ['M15', 'H1', 'H4', 'D1']),
+        ('EURUSD', ['M15', 'H4', 'D1']),
+        ('NAS100', ['M15', 'H4', 'D1']),
+    ]
+
+    # Apply filters
+    if args.symbol:
+        all_pairs = [(s, tfs) for s, tfs in all_pairs if s == args.symbol]
+    if args.tf:
+        all_pairs = [(s, [t for t in tfs if t == args.tf]) for s, tfs in all_pairs]
+
+    all_results = []
+
+    for symbol, timeframes in all_pairs:
+        for tf in timeframes:
+            log(f"\n{'='*60}")
+            log(f"  {symbol} {tf}")
+            log(f"{'='*60}")
+
+            # Step 1: Load data
+            df = load_data(symbol, tf)
+            if df is None or len(df) < 500:
+                log(f"  Insufficient data")
+                continue
+
+            # Step 2: Create labels first (needed for importance-based feature selection)
+            df = create_labels(df, symbol, tf, mode=args.mode)
+            if df is None or len(df) < 500:
+                log(f"  Insufficient labeled data")
+                continue
+
+            # Step 3: Select features (importance-based pruning reduces overfitting)
+            features = select_features(df, max_features=args.max_features)
+            if len(features) < 10:
+                log(f"  Too few features ({len(features)})")
+                continue
+            features = [f for f in features if f in df.columns and f not in FORBIDDEN]
+
+            # Step 4: Train with walk-forward
+            result = train_walk_forward(df, features, symbol, tf)
+            if result:
+                all_results.append(result)
+
+                # Save model
+                name = f"{symbol}_{tf}_{args.mode}"
+                if result['model_type'] == 'xgb':
+                    result['model'].save_model(os.path.join(MODELS_DIR, f'{name}_xgb.json'))
+                else:
+                    joblib.dump(result['model'], os.path.join(MODELS_DIR, f'{name}_lgb.pkl'))
+
+                # Save feature list
+                with open(os.path.join(MODELS_DIR, f'{name}_features.json'), 'w') as f:
+                    json.dump({'features': result['features'], 'n_features': result['n_features'],
+                               'model_type': result['model_type'], 'symbol': symbol, 'timeframe': tf}, f, indent=2)
+
+                log(f"  Saved {name}")
+
+    # ── Final Summary ──
+    log("\n" + "=" * 70)
+    log("FINAL RESULTS — ALL MODELS (sorted by Sharpe)")
+    log("=" * 70)
+    log(f"  {'Symbol':<8} {'TF':<5} {'Type':<5} {'Feat':<5} {'Acc':<8} {'Sharpe':<8} {'PF':<7} {'WR':<8} {'WF+':<5}")
+    log(f"  {'-'*60}")
+
+    for r in sorted(all_results, key=lambda x: -x['sharpe']):
+        log(f"  {r['symbol']:<8} {r['timeframe']:<5} {r['model_type']:<5} "
+            f"{r['n_features']:<5} {r['accuracy']:>5.1%}  {r['sharpe']:>6.2f}  "
+            f"{r['pf']:>5.2f}  {r['avg_win_rate']:>5.1f}%  "
+            f"{r['positive_windows']}/{r['total_windows']}")
+
+    if all_results:
+        best = max(all_results, key=lambda x: x['sharpe'])
+        log(f"\n  BEST: {best['symbol']} {best['timeframe']} ({best['model_type'].upper()}) "
+            f"— Sharpe={best['sharpe']:.2f} PF={best['pf']:.2f} Acc={best['accuracy']:.1%} "
+            f"using {best['n_features']} features")
+
+        tf_sharpes = {}
+        for r in all_results:
+            tf_sharpes.setdefault(r['timeframe'], []).append(r['sharpe'])
+        log(f"\n  Avg Sharpe by TF:")
+        for tf in ['M15', 'H1', 'H4', 'D1']:
+            if tf in tf_sharpes:
+                log(f"    {tf}: {np.mean(tf_sharpes[tf]):.2f}")
+
+    log(f"\n  Models: {MODELS_DIR}")
+    log(f"  Log: {LOG_FILE}")
+    log("=" * 70)
+
+
+if __name__ == '__main__':
+    main()

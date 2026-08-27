@@ -1,0 +1,10 @@
+symbol,time,close,pat_score,pat_bias,pat_name,pat_engulfing,pat_doji,backend
+EURUSD,2026-07-23 01:30:00,1.14065,0.0,0,none,0.0,0.0,pandas
+USDJPY,2026-07-23 01:30:00,163.126,0.0,0,none,0.0,0.0,pandas
+AUDUSD,2026-07-23 01:30:00,0.6987,0.0,0,none,0.0,0.0,pandas
+GBPUSD,2026-07-23 01:30:00,1.33684,-100.0,-1,pat_engulfing=-100,-100.0,0.0,pandas
+USDCAD,2026-07-23 01:30:00,1.40893,0.0,0,none,0.0,0.0,pandas
+BTCUSD,2026-07-23 01:30:00,65923.13,0.0,0,none,0.0,0.0,pandas
+ETHUSD,2026-07-23 01:30:00,1930.81,0.0,0,none,0.0,0.0,pandas
+XRPUSD,2026-07-23 01:30:00,1.1355,-100.0,-1,pat_engulfing=-100,-100.0,0.0,pandas
+XAUUSD,2026-07-23 01:30:00,4121.64,0.0,0,none,0.0,0.0,pandas

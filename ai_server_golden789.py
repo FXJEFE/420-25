@@ -46,6 +46,40 @@ import warnings
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
+# System Python 3.14 has no torch/lightgbm/onnxruntime. Re-exec into the
+# project venv before those imports so a double-click / wrong interpreter
+# still serves the full golden stack.
+_VENV_PY = os.path.join(
+    os.environ.get("USERPROFILE", r"C:\Users\locallarry"),
+    "Documents",
+    "FXJEFE_Project",
+    "venv",
+    "Scripts",
+    "python.exe",
+)
+
+
+def _in_project_venv() -> bool:
+    marker = os.path.normcase(
+        os.path.join(
+            os.environ.get("USERPROFILE", r"C:\Users\locallarry"),
+            "Documents",
+            "FXJEFE_Project",
+            "venv",
+        )
+    )
+    pref = os.path.normcase(getattr(sys, "prefix", "") or "")
+    exe = os.path.normcase(sys.executable or "")
+    return pref.startswith(marker) or (marker + os.sep) in exe
+
+
+if (
+    os.environ.get("FXJEFE_SKIP_VENV", "").strip() not in ("1", "true", "yes")
+    and os.path.isfile(_VENV_PY)
+    and not _in_project_venv()
+):
+    os.execv(_VENV_PY, [_VENV_PY, "-X", "utf8", "-u", *sys.argv])
+
 import joblib
 import numpy as np
 import xgboost as xgb
@@ -114,14 +148,30 @@ MODELS_DIR = config.get("models_path") or os.path.join(PROJECT_ROOT, "models")
 LOG_DIR = config.get("log_path") or os.path.join(PROJECT_ROOT, "Logs")
 os.makedirs(LOG_DIR, exist_ok=True)
 os.makedirs(MODELS_DIR, exist_ok=True)
-# Prefer project root first — many files under models/ are zero-filled on this machine
-SEARCH_DIRS = [
-    MODELS_DIR,
+# Prefer valid copies: Documents root holds OG pkls; models/ has many zero-filled USB copies.
+_HOME = os.environ.get("USERPROFILE", r"C:\Users\locallarry")
+_DOCS = os.path.join(_HOME, "Documents")
+_DESKTOP = os.path.join(_HOME, "Desktop")
+_SEARCH_CANDIDATES = [
+    os.path.join(_DOCS, "models"),
+    _DOCS,
     PROJECT_ROOT,
-    os.path.join(PROJECT_ROOT, "FXJEFE_Project", "models"),
     os.path.join(PROJECT_ROOT, "models"),
+    os.path.join(_DOCS, "models", "og333_runs"),
+    os.path.join(PROJECT_ROOT, "models", "og333_runs"),
     os.path.join(PROJECT_ROOT, "config"),
+    MODELS_DIR,
+    os.path.join(MODELS_DIR, "og333_runs"),
+    os.path.join(PROJECT_ROOT, "FOR_GROK_APRIL_2026_GOLDEN_BUNDLE", "models"),
+    _DESKTOP,
+    os.path.join(_DESKTOP, "Agent-Larry-Portable"),
 ]
+SEARCH_DIRS = []
+for _d in _SEARCH_CANDIDATES:
+    if _d and os.path.isdir(_d) and _d not in SEARCH_DIRS:
+        SEARCH_DIRS.append(_d)
+if _DOCS not in sys.path:
+    sys.path.append(_DOCS)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -148,7 +198,8 @@ _w = config.get("golden_weights") or {}
 W_XGB = float(_w.get("xgb_6", 0.30))
 W_NINE = float(_w.get("avg_9feat", 0.30))
 W_FULL = float(_w.get("rf_28", 0.25))
-W_SYM = float(_w.get("symbol_model", 0.15))  # per-symbol specialist
+W_SYM = float(_w.get("symbol_model", 0.15))  # per-symbol M5+M15+H1 specialists
+W_ZOO = float(_w.get("zoo", 0.10))  # latest og333_runs zoo only, never drown OG full
 
 # Confidence band: tradeable ONLY if GATE <= conf <= MAX_CONF
 # Allows multi-model voting AND singular (1 group/model) when in band.
@@ -168,7 +219,7 @@ if MAX_CONF < GATE:
 if MAX_CONF > 0.9999:
     MAX_CONF = 0.9888
 # True = multi-group must agree when 2+ groups active; singular (1 group) always allowed
-REQUIRE_CONSENSUS = bool(config.get("golden_require_consensus", True))
+REQUIRE_CONSENSUS = bool(config.get("golden_require_consensus", False))
 ALLOW_SINGULAR = bool(config.get("allow_singular_model", True))
 ALLOW_MULTI_VOTE = bool(config.get("allow_multi_model_vote", True))
 STRIP_SUFFIXES = list(
@@ -181,13 +232,23 @@ STRIP_SUFFIXES = list(
 # Prefer project-root copies discovered via audit (2026-07).
 GOLDEN_CORE = {
     # 6-feat XGB filter
-    "xgb_6": ("xgboost_model (1).json", "xgb", FEATURES_6, "xgb"),
+    "xgb_6": (
+        (
+            "xgboost_model (1).json",
+            "xgboost_model - Copy.json",
+            "fxjefe_xgboost_model_20260821_125856.json",
+            "fxjefe_xgboost_model_20260821_023954.json",
+        ),
+        "xgb",
+        FEATURES_6,
+        "xgb",
+    ),
     "xgb_6_alt": ("ensamble_model.pkl.json", "xgb", FEATURES_6, "xgb"),
     "xgb_6_copy": ("xgboost_model - Copy.json", "xgb", FEATURES_6, "xgb"),
     # 9-feat voters
     "ensemble_9a": ("11_feature_rf.pkl", "pkl", FEATURES_9, "nine"),
     "ensemble_9b": ("ensemble_model_new.pkl", "pkl", FEATURES_9, "nine"),
-    "ensemble_9c": ("my_model (1).pkl", "pkl", FEATURES_9, "nine"),
+    "ensemble_9c": (("my_model (1).pkl", "my_modelOG.pkl"), "pkl", FEATURES_9, "nine"),
     "ensemble_9d": ("my_model (5).pkl", "pkl", FEATURES_9, "nine"),
     "forex_9": ("forex_model_2025.pkl", "pkl", FEATURES_9, "nine"),
     # 11-feat
@@ -205,15 +266,67 @@ GOLDEN_OPTIONAL = {
     "lstm": ("lstm_model.h5", "torch", FEATURES_43, "nine"),
     "ensemble_9e": ("my_model (6).pkl", "pkl", FEATURES_9, "nine"),
     "ensemble_9f": ("my_model (7).pkl", "pkl", FEATURES_9, "nine"),
-    "xgb_45_alt": ("xgboost_model (2).json", "xgb", FEATURES_43, "full"),
+    "xgb_45_alt": (("xgboost_model (2).json", "xgboost_model.json"), "xgb", FEATURES_43, "full"),
+    "xgb_og333": ("fxjefe_xgboost_model_20260821_125856.json", "xgb", FEATURES_28, "xgb"),
 }
 
 if LOAD_HEAVY:
     GOLDEN_OPTIONAL["crypto_rf"] = ("crypto_model.pkl", "pkl", FEATURES_28, "full")
     GOLDEN_OPTIONAL["pipe_45_big"] = ("my_model (4).pkl", "pkl", FEATURES_43, "full")
 
+# Early-2025 OG artifacts only (never og333_runs, never later rewrites like my_model.pkl / stacking).
+OG_EARLY_2025_FILES = frozenset(
+    {
+        "11_feature_rf.pkl",
+        "11_feature_rf_XRP_2025_FINAL.pkl",
+        "ensemble_model_new.pkl",
+        "ensemble_model.pkl",
+        "ensemble_modelnew.pkl",
+        "ensamble_model.pkl",
+        "ensamble_model.pkl.json",
+        "my_modelOG.pkl",
+        "my_model (1).pkl",
+        "my_model (2).pkl",
+        "my_model (3).pkl",
+        "my_model (5).pkl",
+        "my_model (6).pkl",
+        "my_model (7).pkl",
+        "my_model (8).pkl",
+        "my_model - Copy.pkl",
+        "forex_model_2025.pkl",
+        "ltdm_model.pkl",
+        "xgboost_model.json",
+        "xgboost_model (1).json",
+        "xgboost_model (2).json",
+        "xgboost_model - Copy.json",
+        "xgboost_best_sharpe.json",
+        "lightgbm_model.pkl",
+        "lstm_model.h5",
+    }
+)
+
 _loaded: Dict[str, dict] = {}
 _symbol_models: Dict[Tuple[str, str], dict] = {}
+# per-symbol M15 bar: empty streak → OG-only fallback after 1 bar with no trade
+_m15_trade_state: Dict[str, dict] = {}
+
+
+def _is_og_early_2025(path: str) -> bool:
+    if not path:
+        return False
+    parts = os.path.normcase(os.path.abspath(path)).split(os.sep)
+    if "og333_runs" in parts:
+        return False
+    base = os.path.basename(path)
+    if "_binary_" in base.lower():
+        return False
+    low = base.lower()
+    # later rewrites — never treat as early-2025 OG
+    if base in ("my_model.pkl", "stacking_model.pkl", "crypto_model.pkl"):
+        return False
+    if "2025" in base:
+        return True
+    return base in OG_EARLY_2025_FILES
 
 
 def _file_looks_valid(path: str) -> bool:
@@ -236,19 +349,102 @@ def _file_looks_valid(path: str) -> bool:
         return False
 
 
-def _resolve_model_path(fname: str) -> Optional[str]:
+def _resolve_model_path(fname) -> Optional[str]:
+    names = list(fname) if isinstance(fname, (list, tuple)) else [fname]
     candidates = []
-    for d in SEARCH_DIRS:
-        candidates.append(os.path.join(d, fname))
-    # de-dupe preserve order
+    for n in names:
+        if not n:
+            continue
+        for d in SEARCH_DIRS:
+            candidates.append(os.path.join(d, n))
     seen = set()
     for p in candidates:
-        if p in seen:
+        key = os.path.normcase(os.path.abspath(p))
+        if key in seen:
             continue
-        seen.add(p)
+        seen.add(key)
         if _file_looks_valid(p):
             return p
     return None
+
+
+def _model_native_names(model, mtype: str) -> Optional[List[str]]:
+    """Read the names the artifact was trained on. Never invent pad_i first."""
+    try:
+        if mtype in ("pkl", "lgb"):
+            fn = getattr(model, "feature_names_in_", None)
+            if fn is not None:
+                return [str(x) for x in list(fn)]
+            if hasattr(model, "feature_name") and callable(model.feature_name):
+                return [str(x) for x in list(model.feature_name())]
+            booster = getattr(model, "booster_", None)
+            if booster is not None and hasattr(booster, "feature_name"):
+                return [str(x) for x in list(booster.feature_name())]
+        if mtype == "xgb":
+            fn = getattr(model, "feature_names", None)
+            if fn:
+                return [str(x) for x in list(fn)]
+        if mtype == "onnx":
+            inp = model.get_inputs()[0]
+            names = getattr(inp, "feature_names", None) or []
+            if names:
+                return [str(x) for x in list(names)]
+    except Exception:
+        return None
+    return None
+
+
+def _name_pool(declared: list) -> List[str]:
+    pool: List[str] = []
+    for src in (declared, FEATURES_6, FEATURES_9, FEATURES_28, FEATURES_FULL, FEATURES_43):
+        for name in src or []:
+            if name and name not in pool and not str(name).startswith(("pad_", "f_")):
+                pool.append(str(name))
+    return pool
+
+
+def _resolve_feature_names(model, mtype: str, declared: list) -> Tuple[List[str], int, bool]:
+    n_actual = _detect_n_features(model, mtype, declared)
+    native = _model_native_names(model, mtype)
+    if native:
+        names = [str(x) for x in native][:n_actual]
+        if len(names) < n_actual:
+            extra = [n for n in _name_pool(declared) if n not in names]
+            names.extend(extra[: n_actual - len(names)])
+        mismatched = [x.lower() for x in names] != [str(x).lower() for x in (declared or [])[: len(names)]]
+        return names, n_actual, mismatched
+    pool = _name_pool(declared)
+    names = pool[:n_actual]
+    if len(names) < n_actual:
+        names = names + [f"f_{i}" for i in range(len(names), n_actual)]
+    mismatched = len(declared or []) != n_actual
+    return names, n_actual, mismatched
+
+
+def _conf_of(p: float) -> float:
+    try:
+        p = float(p)
+    except Exception:
+        return 0.0
+    if p != p:
+        return 0.0
+    return p if p >= 0.5 else (1.0 - p)
+
+
+def _usable_prob(p: Optional[float]) -> Optional[float]:
+    """Keep only in-band votes. Saturated 0.0006 / 0.999 RF spikes are invalid."""
+    if p is None:
+        return None
+    try:
+        p = float(p)
+    except Exception:
+        return None
+    if p != p or p < 0.0 or p > 1.0 or p >= 0.9999:
+        return None
+    conf = _conf_of(p)
+    if conf + 1e-12 < GATE or conf - 1e-12 > MAX_CONF:
+        return None
+    return p
 
 
 def _detect_n_features(model, mtype: str, declared: list) -> int:
@@ -311,21 +507,13 @@ def _load_one(key: str, fname: str, mtype: str, feats: list, group: str) -> Opti
             log.warning(f"  SKIP [{key}]: unknown type {mtype}")
             return None
 
-        n_actual = _detect_n_features(m, mtype, feats)
-        # Align declared list length to actual when possible by pad/truncate names
-        feats_use = list(feats)
-        if n_actual != len(feats_use):
-            if n_actual < len(feats_use):
-                feats_use = feats_use[:n_actual]
-            else:
-                feats_use = feats_use + [f"pad_{i}" for i in range(len(feats_use), n_actual)]
-            mismatched = True
-        else:
-            mismatched = False
+        feats_use, n_actual, mismatched = _resolve_feature_names(m, mtype, feats)
 
         log.info(
             f"  Loaded [{key}] {os.path.basename(path)} type={mtype} "
-            f"n={n_actual} group={group}{' MISMATCH-adj' if mismatched else ''}"
+            f"n={n_actual} group={group} names={','.join(feats_use[:8])}"
+            f"{'…' if len(feats_use) > 8 else ''}"
+            f"{' NAME-MAP' if mismatched else ''}"
         )
         return {
             "model": m,
@@ -335,6 +523,7 @@ def _load_one(key: str, fname: str, mtype: str, feats: list, group: str) -> Opti
             "group": group,
             "mismatched": mismatched,
             "path": path,
+            "og_early_2025": _is_og_early_2025(path),
         }
     except Exception as e:
         log.error(f"  FAILED [{key}] {fname}: {e}")
@@ -352,7 +541,9 @@ def _load_golden() -> None:
         entry = _load_one(key, fname, mtype, feats, group)
         if entry:
             _loaded[key] = entry
+    og_keys = [k for k, e in _loaded.items() if e.get("og_early_2025")]
     log.info(f"Golden registry: {len(_loaded)} models")
+    log.info("OG early-2025 (%s): %s", len(og_keys), ",".join(og_keys) or "none")
 
 
 def _load_symbol_models() -> None:
@@ -424,12 +615,15 @@ def _load_symbol_models() -> None:
                     pass
             if model is None:
                 continue
+            feats_use, n_actual, mismatched = _resolve_feature_names(model, mtype, features)
             _symbol_models[key] = {
                 "model": model,
                 "type": mtype,
-                "features": features,
+                "features": feats_use,
+                "n_features": n_actual,
                 "group": "symbol",
                 "path": fpath,
+                "mismatched": mismatched,
             }
         except Exception as e:
             log.debug(f"symbol model skip {fpath}: {e}")
@@ -437,13 +631,19 @@ def _load_symbol_models() -> None:
 
 
 def _load_zoo() -> None:
-    """Load GridSearch/NN/XGB/LGBM/GB/LSTM/LTDM/HMM artifacts from og333_runs only."""
+    """Load only the newest zoo_* per family from og333_runs. Older copies do not vote."""
     zoo_dir = os.path.join(MODELS_DIR, str(config.get("model_write_dir") or "og333_runs"))
     if not os.path.isdir(zoo_dir):
         return
-    for pkl in glob.glob(os.path.join(zoo_dir, "zoo_*.pkl")):
+    latest: Dict[str, str] = {}
+    for pkl in sorted(glob.glob(os.path.join(zoo_dir, "zoo_*.pkl"))):
         if not _file_looks_valid(pkl):
             continue
+        base = os.path.splitext(os.path.basename(pkl))[0]
+        parts = base.split("_")
+        fam = parts[1] if len(parts) >= 2 else base
+        latest[fam] = pkl
+    for fam, pkl in sorted(latest.items()):
         key = os.path.splitext(os.path.basename(pkl))[0]
         if key in _loaded:
             continue
@@ -473,16 +673,21 @@ def _load_zoo() -> None:
             except Exception as e:
                 log.warning("zoo lstm skip %s: %s", key, e)
                 continue
+        if mtype == "pkl":
+            mtype = "lgb" if ("lgb" in key or "light" in key) else "pkl"
+        feats_use, n_actual, mismatched = _resolve_feature_names(blob, mtype, feats)
         _loaded[key] = {
             "model": blob,
-            "type": mtype if mtype != "pkl" else ("lgb" if "lgb" in key or "light" in key else "pkl"),
-            "features": feats,
-            "n_features": len(feats),
-            "group": "full",
+            "type": mtype,
+            "features": feats_use,
+            "n_features": n_actual,
+            "group": "zoo",
             "path": pkl,
             "zoo": True,
+            "mismatched": mismatched,
+            "og_early_2025": False,
         }
-        log.info("  Loaded [zoo:%s] %s n=%s", key, os.path.basename(pkl), len(feats))
+        log.info("  Loaded [zoo:%s fam=%s] %s n=%s", key, fam, os.path.basename(pkl), n_actual)
 
 
 def load_all() -> None:
@@ -572,20 +777,13 @@ def _extract(data: dict, features: list) -> np.ndarray:
 
 def _prob_buy(key: str, entry: dict, data: dict) -> Optional[float]:
     model = entry["model"]
-    feats = list(entry["features"])
-    # Align feature vector length to what the model expects
-    try:
-        if entry["type"] == "xgb":
-            want = int(model.num_features())
-            if want != len(feats):
-                feats = (feats + [f"f_{i}" for i in range(len(feats), want)])[:want]
-        elif entry["type"] in ("pkl", "lgb"):
-            want = getattr(model, "n_features_in_", None)
-            if want and int(want) != len(feats):
-                want = int(want)
-                feats = (feats + [f"f_{i}" for i in range(len(feats), want)])[:want]
-    except Exception:
-        pass
+    feats = list(entry.get("features") or [])
+    # Name-map only. Do not invent pad_i zeros that flip the vote.
+    if not feats:
+        feats, _, _ = _resolve_feature_names(model, entry.get("type") or "pkl", FEATURES_FULL)
+    want = int(entry.get("n_features") or 0)
+    if want > 0:
+        feats = list(feats)[:want]
     arr = _extract(data, feats)
     try:
         mtype = entry["type"]
@@ -661,36 +859,62 @@ def _find_symbol_model(symbol: str, timeframe: str) -> Optional[Tuple[str, dict]
     return None
 
 
+def _symbol_tf_mean(symbol: str, data: dict, probs: dict) -> Optional[float]:
+    """M5 + M15 + H1 specialists vote; M15 is the trade contract (highest weight)."""
+    tf_w = (("M5", 0.25), ("M15", 0.50), ("H1", 0.25))
+    acc = 0.0
+    wsum = 0.0
+    for tf, w in tf_w:
+        entry = _symbol_models.get((symbol, tf))
+        if not entry:
+            continue
+        sk = f"{symbol}_{tf}"
+        p = _usable_prob(_prob_buy(sk, entry, data))
+        if p is None:
+            continue
+        probs[sk] = round(float(p), 6)
+        acc += float(p) * w
+        wsum += w
+    if wsum <= 0:
+        return None
+    return acc / wsum
+
+
 def ensemble(data: dict, symbol: str, timeframe: str):
     probs: Dict[str, float] = {}
+    usable: Dict[str, float] = {}
     for key, entry in _loaded.items():
         p = _prob_buy(key, entry, data)
-        if p is not None:
-            probs[key] = round(float(p), 6)
+        if p is None:
+            continue
+        probs[key] = round(float(p), 6)
+        up = _usable_prob(p)
+        if up is not None:
+            usable[key] = round(float(up), 6)
 
-    sym_hit = _find_symbol_model(symbol, timeframe)
-    if sym_hit:
-        sk, sentry = sym_hit
-        # Map features from payload (missing → 0)
-        p = _prob_buy(sk, sentry, data)
-        if p is not None:
-            probs[sk] = round(float(p), 6)
+    m_sym = _symbol_tf_mean(symbol, data, probs)
+    if m_sym is not None:
+        usable_sym = _usable_prob(m_sym)
+        if usable_sym is not None:
+            usable[f"{symbol}_MTF"] = round(float(usable_sym), 6)
 
-    if not probs:
-        return 0.5, {}, (None, None, None, None)
+    if not usable:
+        # Keep raw probs for audit, but do not trade on out-of-band-only noise.
+        return 0.5, probs, (None, None, None, None, None)
 
-    xgb_keys = [k for k in probs if k.startswith("xgb_") or k == "xgb_6"]
-    nine_keys = [k for k, e in _loaded.items() if e.get("group") == "nine" and k in probs]
-    full_keys = [k for k, e in _loaded.items() if e.get("group") == "full" and k in probs]
-    # any remaining symbol specialist keys
-    sym_keys = [k for k in probs if k not in _loaded]
+    xgb_keys = [k for k in usable if k.startswith("xgb_") and not str(k).startswith("zoo")]
+    nine_keys = [k for k, e in _loaded.items() if e.get("group") == "nine" and k in usable]
+    full_keys = [k for k, e in _loaded.items() if e.get("group") == "full" and k in usable]
+    zoo_keys = [k for k, e in _loaded.items() if e.get("group") == "zoo" and k in usable]
+    sym_keys = [k for k in usable if k.endswith("_MTF") or (k not in _loaded and k in usable)]
 
     groups = []
     weights = []
-    group_sigs: List[Optional[str]] = [None, None, None, None]
+    group_sigs: List[Optional[str]] = [None, None, None, None, None]
 
     def _mean(keys):
-        return float(np.mean([probs[k] for k in keys])) if keys else None
+        vals = [usable[k] for k in keys if k in usable]
+        return float(np.mean(vals)) if vals else None
 
     mx = _mean(xgb_keys)
     if mx is not None:
@@ -712,6 +936,11 @@ def ensemble(data: dict, symbol: str, timeframe: str):
         groups.append(ms)
         weights.append(W_SYM)
         group_sigs[3] = _sig(ms)
+    mz = _mean(zoo_keys)
+    if mz is not None:
+        groups.append(mz)
+        weights.append(W_ZOO)
+        group_sigs[4] = _sig(mz)
 
     total_w = sum(weights) or 1.0
     ens = sum(c * w / total_w for c, w in zip(groups, weights))
@@ -721,7 +950,7 @@ def ensemble(data: dict, symbol: str, timeframe: str):
 def apply_gates(ens_prob: float, group_signals: tuple) -> Tuple[str, float, dict]:
     """
     Tradeable when:
-      * conf in [GATE, MAX_CONF] inclusive (default 0.77 .. 0.9888)
+      * conf in [GATE, MAX_CONF] inclusive (default 0.70 .. 0.9888)
       * multi-model vote OR singular group/model allowed
       * multi-group consensus when REQUIRE_CONSENSUS and 2+ active groups
     """
@@ -733,7 +962,7 @@ def apply_gates(ens_prob: float, group_signals: tuple) -> Tuple[str, float, dict
         conf = 0.0
     if conf != conf:  # NaN
         conf = 0.0
-    # Trade band: (0.77 .. 0.9888]; 1.0 and >=0.9999 are invalid
+    # Trade band: [0.70, 0.9888]; 1.0 and >=0.9999 are invalid. Feature math unchanged.
     if conf >= 0.9999:
         conf = 1.0  # marked invalid via over_max below
     else:
@@ -797,6 +1026,206 @@ def apply_gates(ens_prob: float, group_signals: tuple) -> Tuple[str, float, dict
     return direction, conf, info
 
 
+def _time_payload() -> dict:
+    try:
+        from fxjefe_time import snapshot
+
+        return snapshot(config).as_dict()
+    except Exception:
+        utc = datetime.now(timezone.utc)
+        return {"utc_iso": utc.strftime("%Y-%m-%dT%H:%M:%SZ"), "error": "tz_unavailable"}
+
+
+def _m15_bar_id(data: dict) -> str:
+    """Floor broker/request time to the current M15 open (900s, server clock)."""
+    for k in ("m15_bar", "bar_time", "time_server_epoch", "time"):
+        v = data.get(k)
+        if v in (None, "", 0, "0"):
+            continue
+        try:
+            ts = int(float(v))
+            if ts > 10**12:  # ms
+                ts //= 1000
+            if ts > 1_000_000_000:
+                return str((ts // 900) * 900)
+        except Exception:
+            return str(v)
+    try:
+        from fxjefe_time import server_now_epoch
+
+        epoch = int(server_now_epoch(config))
+    except Exception:
+        epoch = int(datetime.now(timezone.utc).timestamp())
+    return str((epoch // 900) * 900)
+
+
+def _touch_m15_state(symbol: str, bar_id: str) -> dict:
+    st = _m15_trade_state.get(symbol)
+    if st is None or st.get("bar") != bar_id:
+        prev_empty = bool(st and st.get("empty") and not st.get("traded"))
+        streak = (int(st.get("empty_streak") or 0) + 1) if prev_empty else 0
+        st = {
+            "bar": bar_id,
+            "traded": False,
+            "empty": False,
+            "fallback_used": False,
+            "empty_streak": streak,
+        }
+        _m15_trade_state[symbol] = st
+    return st
+
+
+def _og_early2025_keys() -> List[str]:
+    return [k for k, e in _loaded.items() if e.get("og_early_2025")]
+
+
+def _best_in_band_from_probs(
+    model_probs: dict, prefer_og: bool = True
+) -> Tuple[str, float, Optional[str], float]:
+    """Highest in-band vote from already-computed probs. Drops 1.0 / >=0.9999."""
+    og_keys = set(_og_early2025_keys())
+    best_sig, best_conf, best_key, best_prob = "hold", 0.0, None, 0.5
+    for key, raw in (model_probs or {}).items():
+        if str(key).startswith("og:"):
+            continue
+        try:
+            p = float(raw)
+        except Exception:
+            continue
+        if p != p or p >= 0.9999:
+            continue
+        direction = "buy" if p >= 0.5 else "sell"
+        conf = p if direction == "buy" else (1.0 - p)
+        if conf + 1e-12 < GATE or conf - 1e-12 > MAX_CONF:
+            continue
+        is_og = key in og_keys
+        better = conf > best_conf + 1e-12
+        if (not better) and prefer_og and abs(conf - best_conf) <= 1e-12:
+            if is_og and best_key not in og_keys:
+                better = True
+        if better:
+            best_sig, best_conf, best_key, best_prob = direction, float(conf), key, p
+    return best_sig, best_conf, best_key, best_prob
+
+
+def _og_early2025_decide(data: dict) -> Tuple[str, float, Optional[str], dict, float]:
+    """Highest-confidence early-2025 OG model inside [GATE, MAX_CONF]. No consensus."""
+    votes: Dict[str, dict] = {}
+    best_sig = "hold"
+    best_conf = 0.0
+    best_key: Optional[str] = None
+    best_prob = 0.5
+    for key, entry in _loaded.items():
+        if not entry.get("og_early_2025"):
+            continue
+        p = _prob_buy(key, entry, data)
+        if p is None:
+            continue
+        direction = "buy" if p >= 0.5 else "sell"
+        conf = p if direction == "buy" else (1.0 - p)
+        votes[key] = {"p": round(float(p), 6), "sig": direction, "conf": round(float(conf), 4)}
+        if conf + 1e-12 < GATE or conf - 1e-12 > MAX_CONF:
+            continue
+        if conf >= 0.9999:
+            continue
+        if conf > best_conf:
+            best_sig, best_conf, best_key, best_prob = direction, float(conf), key, float(p)
+    return best_sig, best_conf, best_key, votes, best_prob
+
+
+def _maybe_og_fallback(
+    symbol: str,
+    timeframe: str,
+    data: dict,
+    signal: str,
+    confidence: float,
+    ens_prob: float,
+    model_probs: dict,
+    gate_info: dict,
+) -> Tuple[str, float, float, dict, dict]:
+    """Multi-model vote is the trade. OG/specialist fills only when ensemble is hold.
+
+    Never let one OG model override a passing ensemble (that was flipping
+    BTCUSD buy/sell on the same M15 bar). Keep volume: an in-band single
+    vote may still fire when the weighted vote is hold.
+    """
+    tf = (timeframe or "M15").upper()
+    if tf.startswith("PERIOD_"):
+        tf = tf[7:]
+    always = bool(config.get("og_always_singular", False))
+    empty_ok = bool(config.get("og_fallback_after_empty_m15", True))
+
+    bar_id = _m15_bar_id(data)
+    st = _touch_m15_state(symbol, bar_id)
+    gate_info = dict(gate_info or {})
+    gate_info["m15_bar"] = bar_id
+    gate_info["og_always_singular"] = always
+
+    og_sig, og_conf, og_key, og_votes, og_prob = _og_early2025_decide(data)
+    pb_sig, pb_conf, pb_key, pb_prob = _best_in_band_from_probs(model_probs or {})
+    # Prefer an in-band specialist/zoo vote only as a fill, not as an override.
+    fill_sig, fill_conf, fill_key, fill_prob = og_sig, og_conf, og_key, og_prob
+    if pb_key is not None and (fill_key is None or float(pb_conf) > float(fill_conf) + 1e-12):
+        fill_sig, fill_conf, fill_key, fill_prob = pb_sig, pb_conf, pb_key, pb_prob
+    gate_info["og_models"] = list(og_votes.keys())
+    gate_info["og_votes"] = og_votes
+    gate_info["in_band_pick"] = pb_key
+
+    def _take_fill(reason: str) -> Tuple[str, float, float, dict, dict]:
+        st["traded"] = True
+        st["fallback_used"] = True
+        st["empty"] = False
+        gi = dict(gate_info)
+        gi["stat_ok"] = True
+        gi["consensus_ok"] = True
+        gi["consensus_waived"] = True
+        gi["og_fallback"] = True
+        gi["og_model"] = fill_key
+        gi["vote_mode"] = "in_band_fill"
+        gi["og_reason"] = reason
+        gi["n_active"] = max(1, int(gi.get("n_active") or 1))
+        merged = dict(model_probs or {})
+        for k, v in og_votes.items():
+            merged[f"og:{k}"] = v.get("p")
+        log.info(
+            "[%s %s] in-band fill %s conf=%.4f model=%s (%s)",
+            symbol, tf, fill_sig.upper(), fill_conf, fill_key, reason,
+        )
+        return fill_sig, fill_conf, fill_prob, merged, gi
+
+    fill_ok = fill_sig in ("buy", "sell") and fill_key is not None
+    cons_ok = signal in ("buy", "sell")
+
+    if cons_ok:
+        # Ensemble already passed the band — do not override with a singleton.
+        if fill_ok and fill_sig == signal and float(fill_conf) > float(confidence) + 1e-12:
+            gate_info["og_agrees"] = True
+            gate_info["og_model"] = fill_key
+        else:
+            gate_info["og_agrees"] = bool(fill_ok and fill_sig == signal)
+        gate_info["og_fallback"] = False
+        st["traded"] = True
+        st["empty"] = False
+        return signal, confidence, ens_prob, model_probs, gate_info
+
+    # Ensemble hold — fill with the best in-band vote so we still take many trades.
+    if always and fill_ok:
+        return _take_fill("ensemble_hold_fill")
+
+    st["empty"] = True
+    need = int(config.get("og_fallback_empty_bars", 1) or 1)
+    if need < 1:
+        need = 1
+    empties = int(st.get("empty_streak") or 0) + 1
+    gate_info["empty_m15_bars"] = empties
+    gate_info["og_fallback"] = False
+    if not empty_ok or empties < need or not fill_ok:
+        if not fill_ok:
+            gate_info["vote_mode"] = "multi_hold"
+        return signal, confidence, ens_prob, model_probs, gate_info
+    return _take_fill("empty_m15_fallback")
+
+
 def _audit(row: dict) -> None:
     try:
         path = os.path.join(LOG_DIR, f"audit_golden_{datetime.now(timezone.utc).strftime('%Y%m%d')}.csv")
@@ -836,10 +1265,11 @@ def _audit(row: dict) -> None:
 
 # ── Flask ─────────────────────────────────────────────────────────────────────
 app = Flask(__name__)
+_SERVER_STARTED = datetime.now(timezone.utc)
 
 
-@app.route("/health", methods=["GET"])
-def health():
+def handle_health() -> dict:
+    """Transport-agnostic health payload (Flask / FastAPI / ZeroMQ)."""
     models_info = {
         k: {
             "type": v["type"],
@@ -850,153 +1280,157 @@ def health():
         for k, v in _loaded.items()
     }
     sym = [f"{s}_{t}" for (s, t) in sorted(_symbol_models.keys())]
-    return jsonify(
-        {
-            "status": "running",
-            "ok": True,
-            "http_ready": True,
-            "gate": GATE,
-            "max_conf": MAX_CONF,
-            "hard_floor": _HARD_FLOOR,
-            "allow_singular": ALLOW_SINGULAR,
-            "allow_multi_vote": ALLOW_MULTI_VOTE,
-            "require_consensus": REQUIRE_CONSENSUS,
-            "confidence_band": [GATE, MAX_CONF],
-            "max_leverage": int(config.get("max_leverage") or 400),
-            "server": "ai_server_golden_comprehensive",
-            "loaded_models": len(_loaded),
-            "symbol_models": len(_symbol_models),
-            "models": models_info,
-            "symbol_list": sym,
-            "gate": GATE,
-            "require_consensus": REQUIRE_CONSENSUS,
-            "weights": {"xgb": W_XGB, "nine": W_NINE, "full": W_FULL, "symbol": W_SYM},
-            "load_heavy": LOAD_HEAVY,
-            "models_dir": MODELS_DIR,
-            "search_dirs": SEARCH_DIRS,
-            "preferred_timeframe": str(config.get("preferred_timeframe") or "M15"),
-            "feature_contract": {
-                "6": FEATURES_6,
-                "9": FEATURES_9,
-                "full": FEATURES_FULL,
-            },
-            "m15_symbol_models": [
-                f"{s}_{t}" for (s, t) in sorted(_symbol_models.keys()) if t == "M15"
-            ],
-        }
-    )
+    n_loaded = len(_loaded)
+    n_symbol = len(_symbol_models)
+    uptime = int((datetime.now(timezone.utc) - _SERVER_STARTED).total_seconds())
+    return {
+        "status": "running",
+        "ok": True,
+        "http_ready": True,
+        "python_alive": True,
+        "python_alive_str": "yes",
+        "gate": GATE,
+        "max_conf": MAX_CONF,
+        "hard_floor": _HARD_FLOOR,
+        "allow_singular": ALLOW_SINGULAR,
+        "allow_multi_vote": ALLOW_MULTI_VOTE,
+        "require_consensus": REQUIRE_CONSENSUS,
+        "confidence_band": [GATE, MAX_CONF],
+        "max_leverage": int(config.get("max_leverage") or 400),
+        "server": "ai_server_golden_comprehensive",
+        "loaded_models": n_loaded,
+        "models_loaded": n_loaded,
+        "symbol_models": n_symbol,
+        "og_early_2025": _og_early2025_keys(),
+        "og_fallback_after_empty_m15": bool(config.get("og_fallback_after_empty_m15", True)),
+        "og_fallback_empty_bars": int(config.get("og_fallback_empty_bars", 1) or 1),
+        "og_always_singular": bool(config.get("og_always_singular", True)),
+        "models": models_info,
+        "symbol_list": sym,
+        "gate": GATE,
+        "require_consensus": REQUIRE_CONSENSUS,
+        "weights": {"xgb": W_XGB, "nine": W_NINE, "full": W_FULL, "symbol": W_SYM},
+        "load_heavy": LOAD_HEAVY,
+        "models_dir": MODELS_DIR,
+        "search_dirs": SEARCH_DIRS,
+        "preferred_timeframe": str(config.get("preferred_timeframe") or "M15"),
+        "feature_contract": {
+            "6": FEATURES_6,
+            "9": FEATURES_9,
+            "full": FEATURES_FULL,
+        },
+        "m15_symbol_models": [
+            f"{s}_{t}" for (s, t) in sorted(_symbol_models.keys()) if t == "M15"
+        ],
+        "pid": os.getpid(),
+        "python": sys.version.split()[0],
+        "uptime_sec": uptime,
+        "zmq_fallback": "tcp://127.0.0.1:8081",
+        "fastapi": True,
+        "time": _time_payload(),
+    }
 
 
-@app.route("/models", methods=["GET"])
-def models_ep():
-    return jsonify(
-        {
-            "golden": list(_loaded.keys()),
-            "symbol": [f"{s}_{t}" for (s, t) in sorted(_symbol_models.keys())],
-        }
-    )
-
-
-@app.route("/predict", methods=["POST"])
-def predict():
+def handle_predict(data: dict) -> dict:
+    """Transport-agnostic /predict. Same math for Flask, FastAPI, and ZeroMQ."""
+    data = dict(data or {})
     try:
-        # Persistent JSON parse: Flask first, then robust UTF-8 text parse
-        data = request.get_json(force=True, silent=True)
-        if not isinstance(data, dict):
-            raw_body = request.get_data(as_text=True) or ""
+        from schema_migration import prepare_predict_payload, detect_schema, coerce_features
+
+        src = detect_schema(coerce_features(data))
+        log.info("Incoming schema detected: %s", src)
+        data = prepare_predict_payload(data)
+    except Exception as e:
+        log.warning("schema migration skipped: %s", e)
+    try:
+        px = float(data.get("price") or 0)
+    except Exception:
+        px = 0.0
+    try:
+        cl = float(data.get("close") or 0)
+    except Exception:
+        cl = 0.0
+    if px <= 0 and cl > 0:
+        data["price"] = cl
+        px = cl
+    elif px > 0 and cl <= 0:
+        data["close"] = px
+    try:
+        gv = float(data.get("garch_vol") or 0)
+    except Exception:
+        gv = 0.0
+    if gv <= 0:
+        try:
+            rv = float(data.get("realized_vol") or 0)
+        except Exception:
+            rv = 0.0
+        if rv > 0:
+            data["garch_vol"] = rv
+        elif px > 0:
             try:
-                parsed = _fx_parse_json(raw_body)
-                data = parsed if isinstance(parsed, dict) else {}
+                atr0 = float(data.get("atr") or 0)
             except Exception:
-                data = {}
-        data = data or {}
-        # ── Normalize live / MQ5 payloads to golden feature contracts ──
-        # Predict/EA may send close without price; FEATURES_6/9 need price + garch_vol
-        try:
-            px = float(data.get("price") or 0)
-        except Exception:
-            px = 0.0
-        try:
-            cl = float(data.get("close") or 0)
-        except Exception:
-            cl = 0.0
-        if px <= 0 and cl > 0:
-            data["price"] = cl
-            px = cl
-        elif px > 0 and cl <= 0:
-            data["close"] = px
-        try:
-            gv = float(data.get("garch_vol") or 0)
-        except Exception:
-            gv = 0.0
-        if gv <= 0:
-            # fall back: realized_vol or atr/price as return-vol proxy
-            try:
-                rv = float(data.get("realized_vol") or 0)
-            except Exception:
-                rv = 0.0
-            if rv > 0:
-                data["garch_vol"] = rv
-            elif px > 0:
-                try:
-                    atr0 = float(data.get("atr") or 0)
-                except Exception:
-                    atr0 = 0.0
-                if atr0 > 0:
-                    data["garch_vol"] = atr0 / px
+                atr0 = 0.0
+            if atr0 > 0:
+                data["garch_vol"] = atr0 / px
 
-        symbol = normalize_symbol(str(data.get("symbol", "")))
-        timeframe = str(data.get("timeframe") or config.get("preferred_timeframe") or "M15").strip().upper()
-        if not timeframe:
-            timeframe = "M15"
-        if timeframe.startswith("PERIOD_"):
-            timeframe = timeframe[7:]
-        data = _enrich_from_feature_csv(data, symbol)
-        price = float(data.get("price", 0) or 0)
-        atr = float(data.get("atr", 0.001) or 0.001)
+    symbol = normalize_symbol(str(data.get("symbol", "")))
+    timeframe = str(data.get("timeframe") or config.get("preferred_timeframe") or "M15").strip().upper()
+    if not timeframe:
+        timeframe = "M15"
+    if timeframe.startswith("PERIOD_"):
+        timeframe = timeframe[7:]
+    data = _enrich_from_feature_csv(data, symbol)
+    price = float(data.get("price", 0) or 0)
+    atr = float(data.get("atr", 0.001) or 0.001)
 
-        ens_prob, model_probs, group_signals = ensemble(data, symbol, timeframe)
-        signal, confidence, gate_info = apply_gates(ens_prob, group_signals)
+    ens_prob, model_probs, group_signals = ensemble(data, symbol, timeframe)
+    signal, confidence, gate_info = apply_gates(ens_prob, group_signals)
 
-        # LOSS PROTECTION: tradeable only inside [GATE, MAX_CONF]
-        if signal in ("buy", "sell"):
-            c = float(confidence)
-            if c < GATE or c > MAX_CONF:
-                log.warning(
-                    "GATE OVERRIDE blocked %s conf=%.4f outside [%.4f, %.4f] for %s",
-                    signal, c, GATE, MAX_CONF, symbol,
-                )
-                signal = "hold"
-                gate_info = dict(gate_info or {})
-                gate_info["stat_ok"] = False
-                gate_info["blocked_band"] = True
+    if signal in ("buy", "sell"):
+        c = float(confidence)
+        if c < GATE or c > MAX_CONF:
+            log.warning(
+                "GATE OVERRIDE blocked %s conf=%.4f outside [%.4f, %.4f] for %s",
+                signal, c, GATE, MAX_CONF, symbol,
+            )
+            signal = "hold"
+            gate_info = dict(gate_info or {})
+            gate_info["stat_ok"] = False
+            gate_info["blocked_band"] = True
 
-        stop_loss = 0.0
-        if signal == "buy" and price > 0 and atr > 0:
-            stop_loss = price - 2 * atr
-        elif signal == "sell" and price > 0 and atr > 0:
-            stop_loss = price + 2 * atr
+    signal, confidence, ens_prob, model_probs, gate_info = _maybe_og_fallback(
+        symbol, timeframe, data, signal, confidence, ens_prob, model_probs, gate_info
+    )
 
-        log.info(
-            f"[{symbol} {timeframe}] prob={ens_prob:.4f} groups={group_signals} "
-            f"-> {signal.upper()} conf={confidence:.3f} band=[{GATE:.4f},{MAX_CONF:.4f}] "
-            f"mode={gate_info.get('vote_mode')} n={len(model_probs)}"
-        )
-        _audit(
-            {
-                "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                "symbol": symbol,
-                "tf": timeframe,
-                "signal": signal,
-                "conf": round(confidence, 4),
-                "prob": round(ens_prob, 6),
-                "n_models": len(model_probs),
-                "groups": str(group_signals),
-                "gates": json.dumps(gate_info),
-            }
-        )
+    stop_loss = 0.0
+    if signal == "buy" and price > 0 and atr > 0:
+        stop_loss = price - 2 * atr
+    elif signal == "sell" and price > 0 and atr > 0:
+        stop_loss = price + 2 * atr
 
-        return jsonify(
+    log.info(
+        f"[{symbol} {timeframe}] prob={ens_prob:.4f} groups={group_signals} "
+        f"-> {signal.upper()} conf={confidence:.3f} band=[{GATE:.4f},{MAX_CONF:.4f}] "
+        f"mode={gate_info.get('vote_mode')} n={len(model_probs)}"
+    )
+    _audit(
+        {
+            "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "symbol": symbol,
+            "tf": timeframe,
+            "signal": signal,
+            "conf": round(confidence, 4),
+            "prob": round(ens_prob, 6),
+            "n_models": len(model_probs),
+            "groups": str(group_signals),
+            "gates": json.dumps(gate_info),
+        }
+    )
+    try:
+        import fxjefe_schema as _sch
+
+        body = _sch.normalize_response(
             {
                 "signal": signal,
                 "confidence": round(confidence, 4),
@@ -1014,8 +1448,68 @@ def predict():
                 "allow_singular": ALLOW_SINGULAR,
                 "allow_multi_vote": ALLOW_MULTI_VOTE,
                 "server": "ai_server_golden_comprehensive",
+                "og_fallback": bool((gate_info or {}).get("og_fallback")),
+                "og_model": (gate_info or {}).get("og_model") or "",
+                "vote_mode": (gate_info or {}).get("vote_mode") or "in_band_fill",
+                "og_early_2025": _og_early2025_keys(),
+                "time": _time_payload(),
             }
         )
+        return body
+    except Exception:
+        return {
+            "signal": signal,
+            "confidence": round(confidence, 4),
+            "probability": round(ens_prob, 6),
+            "n_models": len(model_probs),
+            "stop_loss": round(stop_loss, 5),
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "model_probs": model_probs,
+            "group_signals": list(group_signals),
+            "min_conf_gate": GATE,
+            "max_conf_gate": MAX_CONF,
+            "gate_passed": signal != "hold",
+            "gate_info": gate_info,
+            "allow_singular": ALLOW_SINGULAR,
+            "allow_multi_vote": ALLOW_MULTI_VOTE,
+            "server": "ai_server_golden_comprehensive",
+            "og_fallback": bool((gate_info or {}).get("og_fallback")),
+            "og_model": (gate_info or {}).get("og_model") or "",
+            "vote_mode": (gate_info or {}).get("vote_mode") or "in_band_fill",
+            "og_early_2025": _og_early2025_keys(),
+            "time": _time_payload(),
+        }
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify(handle_health())
+
+
+@app.route("/models", methods=["GET"])
+def models_ep():
+    return jsonify(
+        {
+            "golden": list(_loaded.keys()),
+            "symbol": [f"{s}_{t}" for (s, t) in sorted(_symbol_models.keys())],
+        }
+    )
+
+
+@app.route("/predict", methods=["POST"])
+def predict():
+    try:
+        data = request.get_json(force=True, silent=True)
+        if not isinstance(data, dict):
+            raw_body = request.get_data(as_text=True) or ""
+            try:
+                parsed = _fx_parse_json(raw_body)
+                data = parsed if isinstance(parsed, dict) else {}
+            except Exception:
+                data = {}
+        body = handle_predict(data or {})
+        return jsonify(body)
     except Exception as e:
         log.error(f"predict error: {e}", exc_info=True)
         return (
@@ -1089,8 +1583,10 @@ if __name__ == "__main__":
     try:
         from waitress import serve
 
-        log.info(f"Serving with waitress on 0.0.0.0:{port}")
-        serve(app, host="0.0.0.0", port=port, threads=8)
+        host = os.environ.get("AI_SERVER_HOST", "127.0.0.1")
+        log.info("Serving with waitress on %s:%s", host, port)
+        serve(app, host=host, port=port, threads=8)
     except Exception as e:
-        log.warning(f"waitress unavailable ({e}); using Flask dev server")
-        app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
+        host = os.environ.get("AI_SERVER_HOST", "127.0.0.1")
+        log.warning("waitress unavailable (%s); Flask threaded on %s:%s", e, host, port)
+        app.run(host=host, port=port, debug=False, threaded=True)

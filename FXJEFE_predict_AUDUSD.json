@@ -1,0 +1,1 @@
+{"schema":"fxjefe.saturn.v1","signal":"sell","confidence":0.8154,"gate_passed":true,"symbol":"AUDUSD","timeframe":"M15","model":"xgb_6","vote_mode":"multi_vote","stop_loss":0.7161,"take_profit":0.0,"updated":"2026-08-21T11:03:04Z"}

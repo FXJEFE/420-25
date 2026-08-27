@@ -1,0 +1,116 @@
+**Add Pruning Callback to the Objective**
+
+Here is the updated objective that prunes unpromising trials early. It reports the running mean macro-F1 after every fold and stops the trial if Optuna decides it is not worth continuing.
+
+### Updated `make_objective` (drop-in replacement)
+
+```python
+def make_objective(X: pd.DataFrame, y: np.ndarray, n_splits: int = 4):
+    """
+    Optuna objective with:
+    - TimeSeriesSplit + gap
+    - Per-fold early stopping inside XGBoost
+    - Optuna pruning after each fold (MedianPruner / Hyperband compatible)
+    """
+    tscv = TimeSeriesSplit(n_splits=n_splits, gap=20)
+
+    def objective(trial: optuna.Trial) -> float:
+        import xgboost as xgb
+        from optuna.exceptions import TrialPruned
+
+        params = {
+            "objective": "multi:softprob",
+            "num_class": int(len(np.unique(y))),
+            "eval_metric": "mlogloss",
+            "tree_method": "hist",
+            "verbosity": 0,
+            "n_jobs": -1,
+            "max_depth": trial.suggest_int("max_depth", 3, 8),
+            "min_child_weight": trial.suggest_int("min_child_weight", 1, 15),
+            "gamma": trial.suggest_float("gamma", 0.0, 4.0),
+            "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.25, log=True),
+            "n_estimators": trial.suggest_int("n_estimators", 150, 700),
+            "subsample": trial.suggest_float("subsample", 0.65, 1.0),
+            "colsample_bytree": trial.suggest_float("colsample_bytree", 0.55, 1.0),
+            "reg_alpha": trial.suggest_float("reg_alpha", 1e-8, 8.0, log=True),
+            "reg_lambda": trial.suggest_float("reg_lambda", 1e-8, 8.0, log=True),
+        }
+
+        scores = []
+        for fold_idx, (train_idx, val_idx) in enumerate(tscv.split(X)):
+            X_tr, X_va = X.iloc[train_idx], X.iloc[val_idx]
+            y_tr, y_va = y[train_idx], y[val_idx]
+
+            model = xgb.XGBClassifier(**params, early_stopping_rounds=30)
+            model.fit(
+                X_tr, y_tr,
+                eval_set=[(X_va, y_va)],
+                verbose=False,
+            )
+            pred = model.predict(X_va)
+            fold_score = f1_score(y_va, pred, average="macro")
+            scores.append(fold_score)
+
+            # Report intermediate value for pruning
+            intermediate = float(np.mean(scores))
+            trial.report(intermediate, step=fold_idx)
+
+            # Prune if the trial is hopeless
+            if trial.should_prune():
+                raise TrialPruned()
+
+        return float(np.mean(scores))
+
+    return objective
+```
+
+### Enable a pruner when creating the study
+
+In `main()` replace the study creation with:
+
+```python
+from optuna.pruners import MedianPruner
+
+study = optuna.create_study(
+    direction="maximize",
+    study_name=study_name,
+    storage=storage,
+    load_if_exists=True,
+    sampler=TPESampler(seed=42),
+    pruner=MedianPruner(
+        n_startup_trials=8,    # let first 8 trials finish fully
+        n_warmup_steps=1,      # start pruning from fold 1
+        interval_steps=1,
+    ),
+)
+```
+
+### What this does
+
+| Mechanism | Behaviour |
+|-----------|-----------|
+| `trial.report(score, step=fold)` | Tells Optuna the running mean after every fold |
+| `trial.should_prune()` | Asks the pruner whether to stop |
+| `TrialPruned` | Cleanly aborts the trial (logged as “PRUNED”) |
+| `MedianPruner` | Kills trials that are below the median of previous trials at the same step |
+| XGBoost `early_stopping_rounds=30` | Still stops boosting early inside each fold |
+
+### Expected effect
+
+- Unpromising hyperparameter combinations are stopped after 1–2 folds instead of running all 4.
+- Typical speed-up: 30–50 % fewer full model fits on the same `n_trials`.
+- MLflow still records pruned trials (status = `PRUNED`).
+
+### Optional stronger pruner
+
+If you want even more aggressive pruning later:
+
+```python
+from optuna.pruners import HyperbandPruner
+
+pruner = HyperbandPruner(min_resource=1, max_resource=4, reduction_factor=3)
+```
+
+For most FXJEFE runs the `MedianPruner` settings above are the best balance.
+
+Replace the objective and the study-creation block with the snippets above and re-run. Pruned trials will appear in both the Optuna study and the MLflow UI.

@@ -1,0 +1,4 @@
+activation,ok,user,home,ts,exe,error,login,server,name,company,balance,equity,leverage,trade_allowed,terminal_path,connected
+user,True,locallarry,C:\Users\locallarry,2026-08-21T10:02:10+00:00,,,,,,,,,,,,
+Vantage,False,,,,C:\Program Files\MetaTrader 5\terminal64.exe,"(-10001, 'IPC send failed')",,,,,,,,,,
+FTMO,True,locallarry,,2026-08-21T10:02:50+00:00,C:\Users\locallarry\AppData\Roaming\FTMO Global Markets MT5 Terminal\terminal64.exe,,1514364424.0,FTMO-Demo,$10k FTMO Free Trial 2-Step,FTMO Global Markets Ltd,9968.32,9968.32,100.0,True,C:\Users\locallarry\AppData\Roaming\FTMO Global Markets MT5 Terminal,True

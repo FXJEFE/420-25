@@ -27,7 +27,10 @@ import logging
 import warnings
 import numpy as np
 import pandas as pd
-import talib
+try:
+    import talib
+except ImportError:
+    talib = None
 import joblib
 from datetime import datetime
 from scipy import stats as scipy_stats
@@ -42,6 +45,8 @@ with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
 MODELS_DIR = config['models_path']
 DATA_DIR = config['data_output_path']
 HIST_DIR = os.path.join(DATA_DIR, 'Historical', 'enhanced')
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+HISTORIC_ROOT = os.path.join(PROJECT_DIR, 'HISTORIC--DATA')
 os.makedirs(MODELS_DIR, exist_ok=True)
 os.makedirs(config['log_path'], exist_ok=True)
 
@@ -507,7 +512,10 @@ def simulate_equity(X_test, y_pred, price_idx, horizon=5):
 def train_walk_forward(df, features, symbol, timeframe, n_windows=6):
     """Walk-forward training: XGBoost + LightGBM, pick best by Sharpe."""
     import xgboost as xgb
-    import lightgbm as lgb
+    _here = os.path.dirname(os.path.abspath(__file__))
+    if _here not in sys.path:
+        sys.path.insert(0, _here)
+    from lightgbm_fallback import lgb
     import optuna
     from sklearn.metrics import accuracy_score
     optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -705,105 +713,108 @@ def _filter_clean_files(file_list):
     return clean if clean else file_list
 
 
-def _load_marked_data(csv_path):
-    """Load a Marked-data CSV (tab-separated, angle-bracket headers from MT5)."""
-    df = pd.read_csv(csv_path, sep='\t')
-    # Strip angle brackets from column names and lowercase
-    df.columns = [c.strip('<>').strip().lower() for c in df.columns]
-
-    # Combine date + time into a single 'time' column
+def _normalize_ohlcv_columns(df):
+    """Map MT5 / live headers to time, open, high, low, close, volume."""
+    df = df.copy()
+    df.columns = [str(c).strip().strip('<>').strip().lower() for c in df.columns]
     if 'date' in df.columns and 'time' in df.columns:
         df['time'] = df['date'].astype(str) + ' ' + df['time'].astype(str)
         df = df.drop(columns=['date'])
     elif 'date' in df.columns:
         df = df.rename(columns={'date': 'time'})
-
-    # Map MT5 column names to standard names
-    df = df.rename(columns={'tickvol': 'volume'})
-    # Drop real volume (usually 0 for forex/crypto)
-    if 'vol' in df.columns:
-        df = df.rename(columns={'vol': 'real_volume'})
-
-    # Ensure numeric types
+    df = df.rename(columns={
+        'tickvol': 'volume', 'tick_volume': 'volume', 'tick volume': 'volume',
+        'vol': 'real_volume',
+    })
     for col in ['open', 'high', 'low', 'close', 'volume']:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce')
-
     return df
+
+
+def _load_marked_data(csv_path):
+    """Load a Marked-data CSV (tab-separated, angle-bracket headers from MT5)."""
+    df = pd.read_csv(csv_path, sep='\t')
+    return _normalize_ohlcv_columns(df)
+
+
+def _read_ohlcv_csv(csv_path):
+    """Read OHLCV whether MT5 tab+angle-bracket or comma CSV."""
+    with open(csv_path, 'rb') as f:
+        head = f.readline()
+    try:
+        first = head.decode('utf-8-sig', errors='replace')
+    except Exception:
+        first = head.decode('latin-1', errors='replace')
+    if '<DATE>' in first.upper() or (first.count('\t') >= 3 and first.count(',') < 3):
+        df = _load_marked_data(csv_path)
+    else:
+        df = pd.read_csv(csv_path)
+        df = _normalize_ohlcv_columns(df)
+    if 'garch_vol' not in df.columns and 'realized_vol' in df.columns:
+        df['garch_vol'] = pd.to_numeric(df['realized_vol'], errors='coerce')
+    return df
+
+
+def _find_ohlcv_files(symbol, tf_name):
+    """Search data/Historical, HISTORIC--DATA, and marked-data folders."""
+    dirs = [
+        HIST_DIR,
+        os.path.join(DATA_DIR, 'Historical', f'Marked-data-{symbol}'),
+        os.path.join(DATA_DIR, 'Historical'),
+        HISTORIC_ROOT,
+        os.path.join(HISTORIC_ROOT, 'pipeline'),
+        DATA_DIR,
+    ]
+    patterns = [
+        f'enhanced_{symbol}_{tf_name}_*.csv',
+        f'{symbol}_{tf_name}_*.csv',
+        f'{symbol}_{tf_name}.csv',
+        f'{symbol}_{tf_name}_enhanced.csv',
+    ]
+    hits = []
+    for d in dirs:
+        if not os.path.isdir(d):
+            continue
+        for pat in patterns:
+            hits.extend(glob.glob(os.path.join(d, pat)))
+    hits = [h for h in hits if os.path.isfile(h)]
+    hits = _filter_clean_files(hits)
+    return sorted(set(hits), key=os.path.getsize, reverse=True)
 
 
 def load_data(symbol, timeframe):
     """Load data from any available source, compute features if needed.
 
-    Priority order:
-      1. Historical/enhanced/  — OHLCV + pre-computed multi-TF features
-      2. Historical/Marked-data-{symbol}/  — raw OHLCV from MT5 export
-      3. Historical/{symbol}_{tf}.csv  — OHLCV with basic features
-      4. FXJEFE_Crypto_Features.csv  — limited pre-computed (no OHLCV)
+    Searches data/Historical, HISTORIC--DATA (MT5 tab exports), then crypto CSV.
     """
     tf_map = {'D1': 'Daily', 'W1': 'Weekly', 'MN1': 'Monthly'}
     tf_name = tf_map.get(timeframe, timeframe)
 
-    # ── Source 1: Historical/enhanced/ (OHLCV + pre-computed features) ──
-    pattern = os.path.join(HIST_DIR, f'enhanced_{symbol}_{tf_name}_*.csv')
-    matches = _filter_clean_files(sorted(glob.glob(pattern), key=os.path.getsize, reverse=True))
+    matches = _find_ohlcv_files(symbol, tf_name)
     if matches:
-        df = pd.read_csv(matches[0])
-        log(f"  Loaded {len(df):,} rows from {os.path.basename(matches[0])}")
+        path = matches[0]
+        df = _read_ohlcv_csv(path)
+        log(f"  Loaded {len(df):,} rows from {path}")
         existing_features = set(df.columns) - {'open', 'high', 'low', 'close', 'volume', 'time', 'symbol'}
-        if 'open' in df.columns and 'close' in df.columns:
+        if 'open' in df.columns and 'close' in df.columns and talib is None:
+            log("  TA-Lib not in this interpreter — returning OHLCV with header-normalized columns")
+            if 'garch_vol' not in df.columns:
+                close = pd.to_numeric(df['close'], errors='coerce')
+                ret = np.log(close.replace(0, np.nan)).diff()
+                df['garch_vol'] = ret.rolling(20, min_periods=5).std().fillna(0.0)
+        elif 'open' in df.columns and 'close' in df.columns:
             log(f"  Computing features from OHLCV (preserving {len(existing_features)} pre-existing)...")
             computed = compute_all_features(df)
             new_cols = [c for c in computed.columns if c not in df.columns]
             for c in new_cols:
                 df[c] = computed[c].values
+            if 'garch_vol' not in df.columns and 'garch_proxy' in df.columns:
+                df['garch_vol'] = df['garch_proxy']
             log(f"  Added {len(new_cols)} new features -> {len(df.columns)} total columns")
         return df
 
-    # ── Source 2: Marked-data (MT5 tab-separated export) ──
-    marked_dir = os.path.join(DATA_DIR, 'Historical', f'Marked-data-{symbol}')
-    if os.path.isdir(marked_dir):
-        pattern = os.path.join(marked_dir, f'{symbol}_{tf_name}_*.csv')
-        matches = _filter_clean_files(sorted(glob.glob(pattern), key=os.path.getsize, reverse=True))
-        if matches:
-            df = _load_marked_data(matches[0])
-            log(f"  Loaded {len(df):,} rows from Marked-data {os.path.basename(matches[0])}")
-            if 'open' in df.columns and 'close' in df.columns:
-                log(f"  Computing 80+ features from OHLCV...")
-                df = compute_all_features(df)
-            return df
-
-    # ── Source 3: Raw OHLCV in Historical/ (various formats) ──
-    #   Try {symbol}_{tf_name}_enhanced.csv first, then {symbol}_{tf_name}.csv
-    for suffix in ['_enhanced.csv', '.csv']:
-        path = os.path.join(DATA_DIR, 'Historical', f'{symbol}_{tf_name}{suffix}')
-        if os.path.exists(path):
-            df = pd.read_csv(path)
-            # Lowercase column names for consistency
-            df.columns = [c.lower() for c in df.columns]
-            df = df.rename(columns={'tickvol': 'volume', 'date': 'time'})
-            log(f"  Loaded {len(df):,} rows from {os.path.basename(path)}")
-            if 'open' in df.columns and 'close' in df.columns:
-                log(f"  Computing features from OHLCV...")
-                df = compute_all_features(df)
-            return df
-
-    # Dated variants (e.g., EURUSD_Daily_201008300000_*.csv)
-    pattern = os.path.join(DATA_DIR, 'Historical', f'{symbol}_{tf_name}_*.csv')
-    matches = _filter_clean_files(sorted(glob.glob(pattern), key=os.path.getsize, reverse=True))
-    # Exclude files already in enhanced/ subfolder
-    matches = [m for m in matches if 'enhanced' not in os.path.dirname(m).split(os.sep)[-1]]
-    if matches:
-        df = pd.read_csv(matches[0])
-        df.columns = [c.lower() for c in df.columns]
-        df = df.rename(columns={'tickvol': 'volume', 'date': 'time'})
-        log(f"  Loaded {len(df):,} rows from {os.path.basename(matches[0])}")
-        if 'open' in df.columns and 'close' in df.columns:
-            log(f"  Computing features from OHLCV...")
-            df = compute_all_features(df)
-        return df
-
-    # ── Source 4: Crypto features CSV (limited — no OHLCV, ~28 features) ──
+    # Crypto features CSV (limited — no OHLCV, ~28 features) ──
     crypto_path = os.path.join(DATA_DIR, 'FXJEFE_Crypto_Features.csv')
     if os.path.exists(crypto_path):
         full_df = pd.read_csv(crypto_path)
@@ -841,18 +852,16 @@ def main():
     # All symbol/timeframe pairs to train.
     # Symbols without OHLCV data will be skipped with a helpful message.
     all_pairs = [
-        # Forex — enhanced OHLCV available for EURUSD; others need MT5 export
+        # M15 is the trade contract; H4/D1/H1 remain context.
         ('EURUSD', ['M15', 'H4', 'D1']),
-        ('USDJPY', ['H4', 'D1']),
-        ('AUDUSD', ['H4', 'D1']),
-        ('GBPUSD', ['H4', 'D1']),
-        ('USDCAD', ['H4', 'D1']),
-        # Metal — enhanced OHLCV available
+        ('USDJPY', ['M15', 'H4', 'D1']),
+        ('AUDUSD', ['M15', 'H4', 'D1']),
+        ('GBPUSD', ['M15', 'H4', 'D1']),
+        ('USDCAD', ['M15', 'H4', 'D1']),
         ('XAUUSD', ['M15', 'H1', 'H4', 'D1']),
-        # Crypto — Marked-data OHLCV available
         ('BTCUSD', ['M15', 'H1', 'H4']),
-        ('XRPUSD', ['H1', 'H4', 'D1']),
-        # Index — enhanced OHLCV available
+        ('ETHUSD', ['M15', 'H1', 'H4']),
+        ('XRPUSD', ['M15', 'H1', 'H4', 'D1']),
         ('NAS100', ['M15', 'H4', 'D1']),
     ]
 

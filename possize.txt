@@ -1,0 +1,64 @@
+//+------------------------------------------------------------------+
+//| FXJEFE — robust position size                                    |
+//| riskAmount = $ to risk                                           |
+//| slDistance = stop distance in POINTS (price_diff / POINT)        |
+//+------------------------------------------------------------------+
+double HFT_PositionSize(const string pair,
+                        const double riskAmount,
+                        const double slDistance,
+                        const double maxLot)
+{
+   if(riskAmount <= 0.0 || slDistance <= 0.0)
+      return 0.0;
+
+   double tickVal  = SymbolInfoDouble(pair, SYMBOL_TRADE_TICK_VALUE);
+   double tickSize = SymbolInfoDouble(pair, SYMBOL_TRADE_TICK_SIZE);
+   double point    = SymbolInfoDouble(pair, SYMBOL_POINT);
+   double minLot   = SymbolInfoDouble(pair, SYMBOL_VOLUME_MIN);
+   double stepLot  = SymbolInfoDouble(pair, SYMBOL_VOLUME_STEP);
+   double brokerMax= SymbolInfoDouble(pair, SYMBOL_VOLUME_MAX);
+
+   if(tickVal <= 0.0 || point <= 0.0)
+      return 0.0;
+
+   if(stepLot <= 0.0)
+      stepLot = (minLot > 0.0 ? minLot : 0.01);
+   if(minLot <= 0.0)
+      minLot = stepLot;
+   if(brokerMax <= 0.0)
+      brokerMax = maxLot > 0.0 ? maxLot : 100.0;
+
+   // $ lost per 1.0 lot for a 1-point move
+   // points_per_tick = tickSize/point  (usually 1 on forex; can differ on CFD/crypto)
+   double pointsPerTick = (tickSize > 0.0) ? (tickSize / point) : 1.0;
+   if(pointsPerTick <= 0.0)
+      pointsPerTick = 1.0;
+
+   double moneyPerPointPerLot = tickVal / pointsPerTick;
+   if(moneyPerPointPerLot <= 0.0)
+      return 0.0;
+
+   // Core formula
+   double lots = riskAmount / (slDistance * moneyPerPointPerLot);
+
+   // Cap
+   double cap = maxLot;
+   if(cap <= 0.0 || cap > brokerMax)
+      cap = brokerMax;
+
+   lots = MathMax(minLot, MathMin(cap, lots));
+
+   // Snap DOWN to volume step (never round up past risk)
+   double steps = MathFloor((lots - minLot) / stepLot + 1e-12);
+   lots = minLot + steps * stepLot;
+
+   int volDigits = 2;
+   if(stepLot < 0.01 - 1e-12)      volDigits = 3;
+   else if(stepLot >= 1.0 - 1e-12) volDigits = 0;
+
+   lots = NormalizeDouble(lots, volDigits);
+   if(lots < minLot)
+      lots = minLot;
+
+   return lots;
+}

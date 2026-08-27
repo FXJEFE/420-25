@@ -1,0 +1,641 @@
+[FXJEFE-PROD] project_root = C:\Users\locallarry\Documents\FXJEFE_Project
+[FXJEFE-PROD] policy = visible processes only; feature list locked via feature_registry
+[FXJEFE-PROD] --- script inventory & relocate ---
+[FXJEFE-INVENTORY] identical_skip - Copy.py
+[FXJEFE-INVENTORY] identical_skip ._- Copy.py
+[FXJEFE-INVENTORY] identical_skip ._.py
+[FXJEFE-INVENTORY] identical_skip ._Load_and_Process.py
+[FXJEFE-INVENTORY] identical_skip ._adjust_csv_headers.py
+[FXJEFE-INVENTORY] identical_skip ._adjust_headers.py
+[FXJEFE-INVENTORY] identical_skip ._advanced_features.py
+[FXJEFE-INVENTORY] identical_skip ._ai_server (2).py
+[FXJEFE-INVENTORY] identical_skip ._ai_server (3).py
+[FXJEFE-INVENTORY] identical_skip ._ai_server (4).py
+[FXJEFE-INVENTORY] identical_skip ._ai_server.py
+[FXJEFE-INVENTORY] identical_skip ._ai_serverYESSIR.py
+[FXJEFE-INVENTORY] identical_skip ._ai_server_v4.py
+[FXJEFE-INVENTORY] identical_skip ._ai_serverno.py
+[FXJEFE-INVENTORY] identical_skip ._analyze_outcomes.py
+[FXJEFE-INVENTORY] identical_skip ._base.py
+[FXJEFE-INVENTORY] identical_skip ._bt-run.py
+[FXJEFE-INVENTORY] identical_skip ._build_advanced_features.py
+[FXJEFE-INVENTORY] identical_skip ._chardet_old.py
+[FXJEFE-INVENTORY] identical_skip ._check_integrity.py
+[FXJEFE-INVENTORY] identical_skip ._check_labels.py
+[FXJEFE-INVENTORY] identical_skip ._check_model_features.py
+[FXJEFE-INVENTORY] identical_skip ._clean_training_data.py
+[FXJEFE-INVENTORY] identical_skip ._convert_encoding.py
+[FXJEFE-INVENTORY] identical_skip ._create_structure.py
+[FXJEFE-INVENTORY] identical_skip ._ensemble_predictions.py
+[FXJEFE-INVENTORY] identical_skip ._export_forex_ohlcv.py
+[FXJEFE-INVENTORY] identical_skip ._feature_engineering.py
+[FXJEFE-INVENTORY] identical_skip ._fix_all_paths.py
+[FXJEFE-INVENTORY] identical_skip ._fix_all_scripts.py
+[FXJEFE-INVENTORY] identical_skip ._fix_csv.py
+[FXJEFE-INVENTORY] identical_skip ._fix_csv_encoding.py
+[FXJEFE-INVENTORY] identical_skip ._fix_leftover.py
+[FXJEFE-INVENTORY] identical_skip ._full_pipeline.py
+[FXJEFE-INVENTORY] identical_skip ._fxjefe_xgboost_api.py
+[FXJEFE-INVENTORY] identical_skip ._generate_graphs.py
+[FXJEFE-INVENTORY] identical_skip ._generate_labels.py
+[FXJEFE-INVENTORY] identical_skip ._generate_new_csv - Copy.py
+[FXJEFE-INVENTORY] identical_skip ._generate_new_csv.py
+[FXJEFE-INVENTORY] identical_skip ._generate_signals_with_xgboost - Copy.py
+[FXJEFE-INVENTORY] identical_skip ._generate_signals_with_xgboost.py
+[FXJEFE-INVENTORY] identical_skip ._generate_synthetic_features.py
+[FXJEFE-INVENTORY] identical_skip ._generate_training_data - Copy (2).py
+[FXJEFE-INVENTORY] identical_skip ._generate_training_data - Copy - Copy.py
+[FXJEFE-INVENTORY] identical_skip ._generate_training_data - Copy.py
+[FXJEFE-INVENTORY] identical_skip ._generate_training_data.py
+[FXJEFE-INVENTORY] identical_skip ._get_lstm_prediction.py
+[FXJEFE-INVENTORY] identical_skip ._inspect_models.py
+[FXJEFE-INVENTORY] identical_skip ._log_summary.py
+[FXJEFE-INVENTORY] identical_skip ._logging_utils.py
+[FXJEFE-INVENTORY] identical_skip ._merge_datasets - Copy.py
+[FXJEFE-INVENTORY] identical_skip ._merge_datasets.py
+[FXJEFE-INVENTORY] identical_skip ._mt5_data_sync.py
+[FXJEFE-INVENTORY] identical_skip ._mt5_signal_script.py
+[FXJEFE-INVENTORY] identical_skip ._parse_log_to_csv.py
+[FXJEFE-INVENTORY] identical_skip ._path_resolver.py
+[FXJEFE-INVENTORY] identical_skip ._process_trades.py
+[FXJEFE-INVENTORY] identical_skip ._pywin32_postinstall - Copy.py
+[FXJEFE-INVENTORY] identical_skip ._pywin32_postinstall.py
+[FXJEFE-INVENTORY] identical_skip ._pywin32_testall - Copy.py
+[FXJEFE-INVENTORY] identical_skip ._pywin32_testall.py
+[FXJEFE-INVENTORY] identical_skip ._risk_management.py
+[FXJEFE-INVENTORY] identical_skip ._run_pipeline.py
+[FXJEFE-INVENTORY] identical_skip ._server (2).py
+[FXJEFE-INVENTORY] identical_skip ._server - Copy.py
+[FXJEFE-INVENTORY] identical_skip ._server.py
+[FXJEFE-INVENTORY] identical_skip ._signal_processor (2).py
+[FXJEFE-INVENTORY] identical_skip ._signal_processor.py
+[FXJEFE-INVENTORY] identical_skip ._standardize_columns.py
+[FXJEFE-INVENTORY] identical_skip ._test_encoding (2).py
+[FXJEFE-INVENTORY] identical_skip ._test_encoding - Copy.py
+[FXJEFE-INVENTORY] identical_skip ._test_encoding.py
+[FXJEFE-INVENTORY] identical_skip ._test_models_win.py
+[FXJEFE-INVENTORY] identical_skip ._test_regex.py
+[FXJEFE-INVENTORY] identical_skip ._test_server (2).py
+[FXJEFE-INVENTORY] identical_skip ._test_server.py
+[FXJEFE-INVENTORY] identical_skip ._train_ensemble (2).py
+[FXJEFE-INVENTORY] identical_skip ._train_ensemble.py
+[FXJEFE-INVENTORY] identical_skip ._train_models (2).py
+[FXJEFE-INVENTORY] identical_skip ._train_models - Copy.py
+[FXJEFE-INVENTORY] identical_skip ._train_models.py
+[FXJEFE-INVENTORY] identical_skip ._train_multi_timeframe.py
+[FXJEFE-INVENTORY] identical_skip ._train_xgboost.py
+[FXJEFE-INVENTORY] identical_skip ._update_database - Copy.py
+[FXJEFE-INVENTORY] identical_skip ._update_database.py
+[FXJEFE-INVENTORY] identical_skip ._update_scripts.py
+[FXJEFE-INVENTORY] identical_skip ._validate_data - Copy.py
+[FXJEFE-INVENTORY] identical_skip ._validate_data.py
+[FXJEFE-INVENTORY] identical_skip ._validation_pipeline.py
+[FXJEFE-INVENTORY] identical_skip ._waitress server.py
+[FXJEFE-INVENTORY] identical_skip ._waitress_server.py
+[FXJEFE-INVENTORY] identical_skip .py
+[FXJEFE-INVENTORY] identical_skip APPLY_accept_all_policy.py
+[FXJEFE-INVENTORY] identical_skip FIX_registry_bug.py
+[FXJEFE-INVENTORY] identical_skip FXJEFE_install.py
+[FXJEFE-INVENTORY] identical_skip Load_and_Process (2).py
+[FXJEFE-INVENTORY] identical_skip Load_and_Process.py
+[FXJEFE-INVENTORY] identical_skip Modified Predict EA WebRequest - Copy.py
+[FXJEFE-INVENTORY] identical_skip Modified Predict EA WebRequest.py
+[FXJEFE-INVENTORY] identical_skip _analyze_conf.py
+[FXJEFE-INVENTORY] identical_skip _push_mt5_signals.py
+[FXJEFE-INVENTORY] identical_skip _restore_zeroed_utf8.py
+[FXJEFE-INVENTORY] identical_skip _scan_utf8.py
+[FXJEFE-INVENTORY] identical_skip _to_utf8.py
+[FXJEFE-INVENTORY] identical_skip adjust_csv_headers (2).py
+[FXJEFE-INVENTORY] identical_skip adjust_csv_headers.py
+[FXJEFE-INVENTORY] identical_skip adjust_headers (2).py
+[FXJEFE-INVENTORY] identical_skip adjust_headers.py
+[FXJEFE-INVENTORY] identical_skip advanced_features (2).py
+[FXJEFE-INVENTORY] identical_skip advanced_features - Copy.py
+[FXJEFE-INVENTORY] identical_skip advanced_features.py
+[FXJEFE-INVENTORY] identical_skip ai_server (2).py
+[FXJEFE-INVENTORY] identical_skip ai_server (3).py
+[FXJEFE-INVENTORY] identical_skip ai_server (4).py
+[FXJEFE-INVENTORY] installed_missing            ai_server (7).py
+[FXJEFE-INVENTORY] identical_skip ai_server.py
+[FXJEFE-INVENTORY] exists_preserved ai_serverYESSIR.py (live file kept)
+[FXJEFE-INVENTORY] installed_missing            ai_server_golden (2).py
+[FXJEFE-INVENTORY] exists_preserved ai_server_golden.py (live file kept)
+[FXJEFE-INVENTORY] identical_skip ai_server_golden28_43.py
+[FXJEFE-INVENTORY] identical_skip ai_server_golden789.py
+[FXJEFE-INVENTORY] exists_preserved ai_server_v4.py (live file kept)
+[FXJEFE-INVENTORY] identical_skip ai_serverno.py
+[FXJEFE-INVENTORY] identical_skip analyze_outcomes (2).py
+[FXJEFE-INVENTORY] identical_skip analyze_outcomes - Copy.py
+[FXJEFE-INVENTORY] identical_skip analyze_outcomes.py
+[FXJEFE-INVENTORY] identical_skip audit_config_paths.py
+[FXJEFE-INVENTORY] identical_skip base (3).py
+[FXJEFE-INVENTORY] identical_skip base.py
+[FXJEFE-INVENTORY] identical_skip bt-run (2).py
+[FXJEFE-INVENTORY] identical_skip bt-run.py
+[FXJEFE-INVENTORY] identical_skip build_advanced_features (2).py
+[FXJEFE-INVENTORY] identical_skip build_advanced_features.py
+[FXJEFE-INVENTORY] identical_skip calculate_future_return.py
+[FXJEFE-INVENTORY] identical_skip chardet (2).py
+[FXJEFE-INVENTORY] identical_skip chardet_old.py
+[FXJEFE-INVENTORY] identical_skip check_integrity (2).py
+[FXJEFE-INVENTORY] identical_skip check_integrity.py
+[FXJEFE-INVENTORY] identical_skip check_labels (2).py
+[FXJEFE-INVENTORY] identical_skip check_labels.py
+[FXJEFE-INVENTORY] identical_skip check_model_features (2).py
+[FXJEFE-INVENTORY] identical_skip check_model_features.py
+[FXJEFE-INVENTORY] identical_skip check_stack.py
+[FXJEFE-INVENTORY] identical_skip clean_training_data (2).py
+[FXJEFE-INVENTORY] identical_skip clean_training_data.py
+[FXJEFE-INVENTORY] identical_skip compile_versioned_pyc.py
+[FXJEFE-INVENTORY] identical_skip convert_encoding (2).py
+[FXJEFE-INVENTORY] identical_skip convert_encoding (3).py
+[FXJEFE-INVENTORY] identical_skip convert_encoding - Copy.py
+[FXJEFE-INVENTORY] identical_skip convert_encoding.py
+[FXJEFE-INVENTORY] identical_skip create_structure (2).py
+[FXJEFE-INVENTORY] identical_skip create_structure.py
+[FXJEFE-INVENTORY] identical_skip deploy_mt5_experts.py
+[FXJEFE-INVENTORY] identical_skip encoding_utf8.py
+[FXJEFE-INVENTORY] identical_skip ensemble_predictions - Copy.py
+[FXJEFE-INVENTORY] identical_skip ensemble_predictions.py
+[FXJEFE-INVENTORY] identical_skip export_forex_ohlcv.py
+[FXJEFE-INVENTORY] installed_missing            feature_contract (2).py
+[FXJEFE-INVENTORY] installed_missing            feature_contract.py
+[FXJEFE-INVENTORY] identical_skip feature_engineering (2).py
+[FXJEFE-INVENTORY] identical_skip feature_engineering.py
+[FXJEFE-INVENTORY] identical_skip feature_engineering_optimized (1).py
+[FXJEFE-INVENTORY] identical_skip feature_engineering_optimized.py
+[FXJEFE-INVENTORY] identical_skip feature_hash.py
+[FXJEFE-INVENTORY] identical_skip feature_importance_nan.py
+[FXJEFE-INVENTORY] identical_skip feature_lock.py
+[FXJEFE-INVENTORY] identical_skip feature_registry.py
+[FXJEFE-INVENTORY] identical_skip fill_all_csvs.py
+[FXJEFE-INVENTORY] identical_skip fix_all_paths.py
+[FXJEFE-INVENTORY] identical_skip fix_all_scripts.py
+[FXJEFE-INVENTORY] identical_skip fix_csv.py
+[FXJEFE-INVENTORY] identical_skip fix_csv_encoding (2).py
+[FXJEFE-INVENTORY] identical_skip fix_csv_encoding.py
+[FXJEFE-INVENTORY] identical_skip fix_leftover.py
+[FXJEFE-INVENTORY] identical_skip fix_ports_to_8080.py
+[FXJEFE-INVENTORY] installed_missing            full_pipeline.777.py
+[FXJEFE-INVENTORY] identical_skip full_pipeline.py
+[FXJEFE-INVENTORY] identical_skip fxjefe_io.py
+[FXJEFE-INVENTORY] identical_skip fxjefe_lags.py
+[FXJEFE-INVENTORY] identical_skip fxjefe_local_framework.py
+[FXJEFE-INVENTORY] identical_skip fxjefe_optional.py
+[FXJEFE-INVENTORY] exists_preserved fxjefe_paths.py (live file kept)
+[FXJEFE-INVENTORY] identical_skip fxjefe_schema.py
+[FXJEFE-INVENTORY] identical_skip fxjefe_smart.py
+[FXJEFE-INVENTORY] identical_skip fxjefe_xgboost_api (3).py
+[FXJEFE-INVENTORY] identical_skip fxjefe_xgboost_api.py
+[FXJEFE-INVENTORY] identical_skip garch_async.py
+[FXJEFE-INVENTORY] identical_skip garch_multistep.py
+[FXJEFE-INVENTORY] identical_skip generate_graphs.py
+[FXJEFE-INVENTORY] identical_skip generate_labels (2).py
+[FXJEFE-INVENTORY] exists_preserved generate_labels.py (live file kept)
+[FXJEFE-INVENTORY] identical_skip generate_new_csv (2).py
+[FXJEFE-INVENTORY] identical_skip generate_new_csv - Copy.py
+[FXJEFE-INVENTORY] identical_skip generate_new_csv.py
+[FXJEFE-INVENTORY] identical_skip generate_signals_with_xgboost (2).py
+[FXJEFE-INVENTORY] identical_skip generate_signals_with_xgboost - Copy.py
+[FXJEFE-INVENTORY] identical_skip generate_signals_with_xgboost.py
+[FXJEFE-INVENTORY] identical_skip generate_synthetic_features (2).py
+[FXJEFE-INVENTORY] identical_skip generate_synthetic_features.py
+[FXJEFE-INVENTORY] identical_skip generate_training_data (2).py
+[FXJEFE-INVENTORY] identical_skip generate_training_data - Copy (2).py
+[FXJEFE-INVENTORY] identical_skip generate_training_data - Copy - Copy.py
+[FXJEFE-INVENTORY] identical_skip generate_training_data - Copy.py
+[FXJEFE-INVENTORY] identical_skip generate_training_data.py
+[FXJEFE-INVENTORY] identical_skip get_lstm_prediction (3).py
+[FXJEFE-INVENTORY] identical_skip get_lstm_prediction.py
+[FXJEFE-INVENTORY] installed_missing            indicators.py
+[FXJEFE-INVENTORY] identical_skip inspect_models.py
+[FXJEFE-INVENTORY] installed_missing            inspect_og_models.py
+[FXJEFE-INVENTORY] identical_skip integrity.py
+[FXJEFE-INVENTORY] identical_skip log_summary (2).py
+[FXJEFE-INVENTORY] identical_skip log_summary.py
+[FXJEFE-INVENTORY] identical_skip logging_utils (2).py
+[FXJEFE-INVENTORY] identical_skip logging_utils.py
+[FXJEFE-INVENTORY] identical_skip margin_precheck.py
+[FXJEFE-INVENTORY] identical_skip merge_datasets (2).py
+[FXJEFE-INVENTORY] identical_skip merge_datasets - Copy (2).py
+[FXJEFE-INVENTORY] identical_skip merge_datasets - Copy.py
+[FXJEFE-INVENTORY] identical_skip merge_datasets.py
+[FXJEFE-INVENTORY] identical_skip model_deploy.py
+[FXJEFE-INVENTORY] identical_skip mt5_data_sync - Copy.py
+[FXJEFE-INVENTORY] identical_skip mt5_data_sync.py
+[FXJEFE-INVENTORY] identical_skip mt5_deployment_status.py
+[FXJEFE-INVENTORY] identical_skip mt5_generate_crypto_features.py
+[FXJEFE-INVENTORY] identical_skip mt5_generate_features.py
+[FXJEFE-INVENTORY] identical_skip mt5_generate_features_wine.py
+[FXJEFE-INVENTORY] identical_skip mt5_latency_bench.py
+[FXJEFE-INVENTORY] identical_skip mt5_signal_script (2).py
+[FXJEFE-INVENTORY] identical_skip mt5_signal_script - Copy.py
+[FXJEFE-INVENTORY] identical_skip mt5_signal_script.py
+[FXJEFE-INVENTORY] installed_missing            mt5_sync.py
+[FXJEFE-INVENTORY] installed_missing            mt5_terminal.py
+[FXJEFE-INVENTORY] identical_skip optimize_talib_optuna.py
+[FXJEFE-INVENTORY] identical_skip optimize_xgboost_optuna.py
+[FXJEFE-INVENTORY] identical_skip optimize_xgboost_optuna333.py
+[FXJEFE-INVENTORY] identical_skip parse_log_to_csv (2).py
+[FXJEFE-INVENTORY] identical_skip parse_log_to_csv - Copy.py
+[FXJEFE-INVENTORY] identical_skip parse_log_to_csv.py
+[FXJEFE-INVENTORY] identical_skip path_loader.py
+[FXJEFE-INVENTORY] identical_skip path_resolver.py
+[FXJEFE-INVENTORY] identical_skip path_validate.py
+[FXJEFE-INVENTORY] identical_skip pipeline_utf8.py
+[FXJEFE-INVENTORY] identical_skip pipelinerun.py
+[FXJEFE-INVENTORY] identical_skip pipelinerun_production.py
+[FXJEFE-INVENTORY] exists_preserved pipelinerun_production333.py (live file kept)
+[FXJEFE-INVENTORY] identical_skip process_trades (2).py
+[FXJEFE-INVENTORY] identical_skip process_trades - Copy.py
+[FXJEFE-INVENTORY] identical_skip process_trades.py
+[FXJEFE-INVENTORY] identical_skip pywin32_postinstall (2).py
+[FXJEFE-INVENTORY] identical_skip pywin32_postinstall - Copy.py
+[FXJEFE-INVENTORY] identical_skip pywin32_postinstall.py
+[FXJEFE-INVENTORY] identical_skip pywin32_testall (2).py
+[FXJEFE-INVENTORY] identical_skip pywin32_testall - Copy.py
+[FXJEFE-INVENTORY] identical_skip pywin32_testall.py
+[FXJEFE-INVENTORY] identical_skip realized_vol_features.py
+[FXJEFE-INVENTORY] identical_skip risk_management (2).py
+[FXJEFE-INVENTORY] identical_skip risk_management - Copy.py
+[FXJEFE-INVENTORY] identical_skip risk_management.py
+[FXJEFE-INVENTORY] exists_preserved run_pipeline.py (live file kept)
+[FXJEFE-INVENTORY] exists_preserved run_pipelineOG333.py (live file kept)
+[FXJEFE-INVENTORY] identical_skip run_with_venv.py
+[FXJEFE-INVENTORY] identical_skip runtime_lock.py
+[FXJEFE-INVENTORY] exists_preserved saturn_boot.py (live file kept)
+[FXJEFE-INVENTORY] identical_skip saturn_service.py
+[FXJEFE-INVENTORY] exists_preserved schema_migration.py (live file kept)
+[FXJEFE-INVENTORY] identical_skip script_inventory.py
+[FXJEFE-INVENTORY] identical_skip secure_strap.py
+[FXJEFE-INVENTORY] identical_skip server (2).py
+[FXJEFE-INVENTORY] identical_skip server (3).py
+[FXJEFE-INVENTORY] identical_skip server - Copy.py
+[FXJEFE-INVENTORY] identical_skip server.py
+[FXJEFE-INVENTORY] identical_skip signal_gate.py
+[FXJEFE-INVENTORY] identical_skip signal_processor (2).py
+[FXJEFE-INVENTORY] identical_skip signal_processor (3).py
+[FXJEFE-INVENTORY] identical_skip signal_processor.py
+[FXJEFE-INVENTORY] identical_skip standardize_columns (2).py
+[FXJEFE-INVENTORY] identical_skip standardize_columns.py
+[FXJEFE-INVENTORY] identical_skip test_encoding (2).py
+[FXJEFE-INVENTORY] identical_skip test_encoding - Copy.py
+[FXJEFE-INVENTORY] identical_skip test_encoding.py
+[FXJEFE-INVENTORY] exists_preserved test_model_accuracy.py (live file kept)
+[FXJEFE-INVENTORY] identical_skip test_models_win.py
+[FXJEFE-INVENTORY] identical_skip test_regex (2).py
+[FXJEFE-INVENTORY] identical_skip test_regex.py
+[FXJEFE-INVENTORY] exists_preserved test_schema_migration.py (live file kept)
+[FXJEFE-INVENTORY] identical_skip test_server (2).py
+[FXJEFE-INVENTORY] identical_skip test_server (3).py
+[FXJEFE-INVENTORY] identical_skip test_server.py
+[FXJEFE-INVENTORY] identical_skip trade_policy_config.py
+[FXJEFE-INVENTORY] identical_skip train_ensemble (2).py
+[FXJEFE-INVENTORY] identical_skip train_ensemble (3).py
+[FXJEFE-INVENTORY] identical_skip train_ensemble.py
+[FXJEFE-INVENTORY] identical_skip train_model_zoo.py
+[FXJEFE-INVENTORY] identical_skip train_models (2).py
+[FXJEFE-INVENTORY] identical_skip train_models - Copy.py
+[FXJEFE-INVENTORY] identical_skip train_models.py
+[FXJEFE-INVENTORY] identical_skip train_multi_timeframe.py
+[FXJEFE-INVENTORY] installed_missing            train_new_models.py
+[FXJEFE-INVENTORY] identical_skip train_xgboost.py
+[FXJEFE-INVENTORY] identical_skip update_database (2).py
+[FXJEFE-INVENTORY] identical_skip update_database - Copy.py
+[FXJEFE-INVENTORY] identical_skip update_database.py
+[FXJEFE-INVENTORY] identical_skip update_scripts (2).py
+[FXJEFE-INVENTORY] identical_skip update_scripts.py
+[FXJEFE-INVENTORY] identical_skip validate_config.py
+[FXJEFE-INVENTORY] identical_skip validate_data (2).py
+[FXJEFE-INVENTORY] identical_skip validate_data - Copy.py
+[FXJEFE-INVENTORY] identical_skip validate_data.py
+[FXJEFE-INVENTORY] identical_skip validation_pipeline.py
+[FXJEFE-INVENTORY] identical_skip verify_checksums.py
+[FXJEFE-INVENTORY] identical_skip verify_m15_align.py
+[FXJEFE-INVENTORY] installed_missing            verify_system.py
+[FXJEFE-INVENTORY] identical_skip waitress server (2).py
+[FXJEFE-INVENTORY] identical_skip waitress server - Copy.py
+[FXJEFE-INVENTORY] identical_skip waitress server.py
+[FXJEFE-INVENTORY] identical_skip waitress_server.py
+[FXJEFE-PROD] inventory discovered=316 verify={'present': ['Load_and_Process.py', 'adjust_headers.py', 'ai_server.py', 'analyze_outcomes.py', 'check_integrity.py', 'check_labels.py', 'check_model_features.py', 'clean_training_data.py', 'convert_encoding.py', 'create_structure.py', 'ensemble_predictions.py', 'feature_engineering.py', 'feature_lock.py', 'feature_registry.py', 'fix_csv.py', 'fix_csv_encoding.py', 'full_pipeline.py', 'fxjefe_local_framework.py', 'fxjefe_xgboost_api.py', 'generate_labels.py', 'generate_new_csv.py', 'generate_signals_with_xgboost.py', 'generate_training_data.py', 'get_lstm_prediction.py', 'log_summary.py', 'logging_utils.py', 'merge_datasets.py', 'model_deploy.py', 'mt5_data_sync.py', 'mt5_generate_crypto_features.py', 'mt5_generate_features.py', 'mt5_signal_script.py', 'parse_log_to_csv.py', 'path_loader.py', 'path_resolver.py', 'path_validate.py', 'pipelinerun.py', 'pipelinerun_production.py', 'process_trades.py', 'risk_management.py', 'run_pipeline.py', 'script_inventory.py', 'secure_strap.py', 'signal_processor.py', 'test_encoding.py', 'test_regex.py', 'test_server.py', 'train_models.py', 'update_database.py', 'update_scripts.py', 'validate_data.py', 'waitress server.py'], 'missing': ['fxjefe_bootstrap.py', 'test_local_trading_models.py', 'test_models_with_shap.py'], 'present_count': 52, 'missing_count': 3, 'production_ready': True, 'policy': 'DO_NOT_REPLACE_CURRENT_SCRIPTS'}
+[FXJEFE-PROD] feature registry loaded from py: C:\Users\locallarry\Documents\FXJEFE_Project\feature_registry.py
+[FXJEFE-PROD] PREDICT=17 TRAIN=28 MIN_CONF=0.77
+[FXJEFE-PROD][OK] compiled feature_registry.pyc under C:\Users\locallarry\Documents\FXJEFE_Project
+[FXJEFE-PROD][OK] config locked features train=28 predict=17 conf=0.77
+[FXJEFE-PROD] --- path_validate ---
+[FXJEFE-PATHCHK] starting automated path validation
+[FXJEFE-PATHCHK][OK] bridge_dir: C:\Users\locallarry\Documents\FXJEFE_Project\bridge
+[FXJEFE-PATHCHK][OK] data_csv_raw: C:\Users\locallarry\Documents\FXJEFE_Project\data\raw_ohlcv
+[FXJEFE-PATHCHK][OK] data_hist: C:\Users\locallarry\Documents\FXJEFE_Project\data\hist
+[FXJEFE-PATHCHK][OK] data_local: C:\Users\locallarry\Documents\FXJEFE_Project\data
+[FXJEFE-PATHCHK][OK] features_dir: C:\Users\locallarry\Documents\FXJEFE_Project\features
+[FXJEFE-PATHCHK][WARN] io_manifest: file does not exist (optional until created) → C:\Users\locallarry\Documents\FXJEFE_Project\config\script_io.json
+[FXJEFE-PATHCHK][OK] logs_dir: C:\Users\locallarry\Documents\FXJEFE_Project\Logs
+[FXJEFE-PATHCHK][OK] models_dir: C:\Users\locallarry\Documents\FXJEFE_Project\models
+[FXJEFE-PATHCHK][OK] mt5_raw_ohlcv: C:\Users\locallarry\Documents\FXJEFE_Project\data\raw_ohlcv
+[FXJEFE-PATHCHK][OK] og_models_dir: C:\Users\locallarry\Documents\models
+[FXJEFE-PATHCHK][OK] pipeline_dir: C:\Users\locallarry\Documents\FXJEFE_Project\pipeline
+[FXJEFE-PATHCHK][OK] production_dir: C:\Users\locallarry\Documents\FXJEFE_Project\production
+[FXJEFE-PATHCHK][OK] project_root: C:\Users\locallarry\Documents\FXJEFE_Project
+[FXJEFE-PATHCHK][OK] python_executable: C:\Users\locallarry\Documents\FXJEFE_Project\venv\Scripts\python.exe
+[FXJEFE-PATHCHK][OK] runs_dir: C:\Users\locallarry\Documents\FXJEFE_Project\runs
+[FXJEFE-PATHCHK][OK] scripts_dir: C:\Users\locallarry\Documents
+[FXJEFE-PATHCHK][OK] state_dir: C:\Users\locallarry\Documents\FXJEFE_Project\state
+[FXJEFE-PATHCHK][OK] venv_dir: C:\Users\locallarry\Documents\FXJEFE_Project\venv
+[FXJEFE-PATHCHK][OK] web_health_url: http://127.0.0.1:8080/health
+[FXJEFE-PATHCHK][OK] web_predict_url: http://127.0.0.1:8080/predict
+[FXJEFE-PATHCHK][OK] web_sentiment_url: http://127.0.0.1:8080/sentiment
+[FXJEFE-PATHCHK][OK] scripts_dir has 88 .py files
+[FXJEFE-PATHCHK][OK] feature_config: C:\Users\locallarry\Documents\FXJEFE_Project\config\config.json (28 features)
+[FXJEFE-PATHCHK][OK] raw_csv count=0
+[FXJEFE-PATHCHK] summary ok=True fails=0 warns=2
+[FXJEFE-PATHS] Resolved path map:
+  bridge_dir           = C:\Users\locallarry\Documents\FXJEFE_Project\bridge
+  data_csv_raw         = C:\Users\locallarry\Documents\FXJEFE_Project\data\raw_ohlcv
+  data_hist            = C:\Users\locallarry\Documents\FXJEFE_Project\data\hist
+  data_local           = C:\Users\locallarry\Documents\FXJEFE_Project\data
+  features_dir         = C:\Users\locallarry\Documents\FXJEFE_Project\features
+  io_manifest          = C:\Users\locallarry\Documents\FXJEFE_Project\config\script_io.json
+  logs_dir             = C:\Users\locallarry\Documents\FXJEFE_Project\Logs
+  models_dir           = C:\Users\locallarry\Documents\FXJEFE_Project\models
+  mt5_raw_ohlcv        = C:\Users\locallarry\Documents\FXJEFE_Project\data\raw_ohlcv
+  og_models_dir        = C:\Users\locallarry\Documents\models
+  pipeline_dir         = C:\Users\locallarry\Documents\FXJEFE_Project\pipeline
+  production_dir       = C:\Users\locallarry\Documents\FXJEFE_Project\production
+  project_root         = C:\Users\locallarry\Documents\FXJEFE_Project
+  python_executable    = C:\Users\locallarry\Documents\FXJEFE_Project\venv\Scripts\python.exe
+  runs_dir             = C:\Users\locallarry\Documents\FXJEFE_Project\runs
+  scripts_dir          = C:\Users\locallarry\Documents
+  state_dir            = C:\Users\locallarry\Documents\FXJEFE_Project\state
+  venv_dir             = C:\Users\locallarry\Documents\FXJEFE_Project\venv
+  web_health_url       = http://127.0.0.1:8080/health
+  web_predict_url      = http://127.0.0.1:8080/predict
+  web_sentiment_url    = http://127.0.0.1:8080/sentiment
+[FXJEFE-PATHCHK] report → C:\Users\locallarry\Documents\FXJEFE_Project\state\path_validation_latest.json
+[FXJEFE-PROD] RUN path_validate.py (timeout=120s) — visible child
+[FXJEFE-PATHCHK] starting automated path validation
+[FXJEFE-PATHCHK][OK] bridge_dir: C:\Users\locallarry\Documents\FXJEFE_Project\bridge
+[FXJEFE-PATHCHK][OK] data_csv_raw: C:\Users\locallarry\Documents\FXJEFE_Project\data\raw_ohlcv
+[FXJEFE-PATHCHK][OK] data_hist: C:\Users\locallarry\Documents\FXJEFE_Project\data\hist
+[FXJEFE-PATHCHK][OK] data_local: C:\Users\locallarry\Documents\FXJEFE_Project\data
+[FXJEFE-PATHCHK][OK] features_dir: C:\Users\locallarry\Documents\FXJEFE_Project\features
+[FXJEFE-PATHCHK][WARN] io_manifest: file does not exist (optional until created) → C:\Users\locallarry\Documents\FXJEFE_Project\config\script_io.json
+[FXJEFE-PATHCHK][OK] logs_dir: C:\Users\locallarry\Documents\FXJEFE_Project\Logs
+[FXJEFE-PATHCHK][OK] models_dir: C:\Users\locallarry\Documents\FXJEFE_Project\models
+[FXJEFE-PATHCHK][OK] mt5_raw_ohlcv: C:\Users\locallarry\Documents\FXJEFE_Project\data\raw_ohlcv
+[FXJEFE-PATHCHK][OK] og_models_dir: C:\Users\locallarry\Documents\models
+[FXJEFE-PATHCHK][OK] pipeline_dir: C:\Users\locallarry\Documents\FXJEFE_Project\pipeline
+[FXJEFE-PATHCHK][OK] production_dir: C:\Users\locallarry\Documents\FXJEFE_Project\production
+[FXJEFE-PATHCHK][OK] project_root: C:\Users\locallarry\Documents\FXJEFE_Project
+[FXJEFE-PATHCHK][OK] python_executable: C:\Users\locallarry\Documents\FXJEFE_Project\venv\Scripts\python.exe
+[FXJEFE-PATHCHK][OK] runs_dir: C:\Users\locallarry\Documents\FXJEFE_Project\runs
+[FXJEFE-PATHCHK][OK] scripts_dir: C:\Users\locallarry\Documents
+[FXJEFE-PATHCHK][OK] state_dir: C:\Users\locallarry\Documents\FXJEFE_Project\state
+[FXJEFE-PATHCHK][OK] venv_dir: C:\Users\locallarry\Documents\FXJEFE_Project\venv
+[FXJEFE-PATHCHK][OK] web_health_url: http://127.0.0.1:8080/health
+[FXJEFE-PATHCHK][OK] web_predict_url: http://127.0.0.1:8080/predict
+[FXJEFE-PATHCHK][OK] web_sentiment_url: http://127.0.0.1:8080/sentiment
+[FXJEFE-PATHCHK][OK] scripts_dir has 88 .py files
+[FXJEFE-PATHCHK][OK] feature_config: C:\Users\locallarry\Documents\FXJEFE_Project\config\config.json (28 features)
+[FXJEFE-PATHCHK][OK] raw_csv count=0
+[FXJEFE-PATHCHK] summary ok=True fails=0 warns=2
+[FXJEFE-PATHCHK] report → C:\Users\locallarry\Documents\FXJEFE_Project\state\path_validation_latest.json
+[FXJEFE-PROD] post-validate path_validate.py: []
+[FXJEFE-PROD] RUN mt5_data_sync.py (timeout=120s) — visible child
+[FXJEFE-PROD] post-validate mt5_data_sync.py: [{'file': 'C:\\Users\\locallarry\\Documents\\FXJEFE_Project\\data\\FXJEFE_Features.csv', 'exists': True, 'size': 6014078}]
+[FXJEFE-PROD] RUN mt5_generate_features.py (timeout=600s) — visible child
+2026-08-25 01:54:09,945 - INFO - mt5_generate_features.py started
+2026-08-25 01:54:10,022 - INFO - Connected: account 34163119, server VantageMarkets-Live 14, balance 33.0
+2026-08-25 01:54:10,024 - INFO - Fetching 2000 M1 bars for EURUSD...
+2026-08-25 01:54:11,189 - INFO -   EURUSD: 2000 rows, price range 1.16552–1.16861
+2026-08-25 01:54:11,190 - INFO - Fetching 2000 M1 bars for USDJPY...
+2026-08-25 01:54:12,437 - INFO -   USDJPY: 2000 rows, price range 158.48000–159.26800
+2026-08-25 01:54:12,438 - WARNING - Symbol XAUUSD not found — skipping.
+2026-08-25 01:54:12,440 - INFO - Fetching 2000 M1 bars for AUDUSD...
+2026-08-25 01:54:13,429 - INFO -   AUDUSD: 2000 rows, price range 0.71403–0.71793
+2026-08-25 01:54:13,430 - INFO - Fetching 2000 M1 bars for GBPUSD...
+2026-08-25 01:54:14,478 - INFO -   GBPUSD: 2000 rows, price range 1.36183–1.36550
+2026-08-25 01:54:14,478 - INFO - Fetching 2000 M1 bars for USDCAD...
+2026-08-25 01:54:15,254 - INFO -   USDCAD: 2000 rows, price range 1.37554–1.38591
+2026-08-25 01:54:15,269 - INFO - Total: 10000 rows across 5 symbols.
+2026-08-25 01:54:15,847 - INFO - Saved → C:\Users\locallarry\Documents\FXJEFE_Project\data\FXJEFE_Features.csv
+2026-08-25 01:54:15,848 - INFO - mt5_generate_features.py completed.
+[FXJEFE-PROD] post-validate mt5_generate_features.py: [{'file': 'C:\\Users\\locallarry\\Documents\\FXJEFE_Project\\data\\FXJEFE_Features.csv', 'exists': True, 'size': 5222839}]
+[FXJEFE-PROD] RUN validate_data.py (timeout=180s) — visible child
+2026-08-25 01:54:18,888 - INFO - Loaded 10000 rows, 31 columns from C:\Users\locallarry\Documents\FXJEFE_Project\data\FXJEFE_Features.csv
+2026-08-25 01:54:18,895 - INFO - All required columns present.
+2026-08-25 01:54:18,924 - INFO - No NaN values in feature columns.
+2026-08-25 01:54:18,933 - INFO - Symbols found: ['EURUSD', 'USDJPY', 'AUDUSD', 'GBPUSD', 'USDCAD']
+2026-08-25 01:54:18,941 - INFO - Rows per symbol: {'EURUSD': 2000, 'USDJPY': 2000, 'AUDUSD': 2000, 'GBPUSD': 2000, 'USDCAD': 2000}
+2026-08-25 01:54:18,942 - INFO - Data validation complete.
+[FXJEFE-PROD] post-validate validate_data.py: []
+[FXJEFE-PROD] RUN Load_and_Process.py (timeout=180s) — visible child
+2026-08-25 01:54:21,140 - INFO - Loaded 10000 rows, 31 columns.
+2026-08-25 01:54:21,141 - INFO - Columns present: ['time', 'symbol', 'price', 'atr', 'ema_diff', 'rsi', 'macd_diff', 'vwap', 'price_vwap_diff', 'bb_position', 'roc', 'stochastic', 'cci', 'williams', 'momentum', 'realized_vol', 'chaikin_vol', 'adx', 'rvi', 'obv', 'volume_delta', 'ad_line', 'vol_osc', 'supertrend', 'hma', 'ichimoku_tenkan', 'sar', 'dpo', 'spread', 'sentiment', 'signal']
+2026-08-25 01:54:21,143 - INFO - All expected columns present.
+2026-08-25 01:54:21,179 - INFO - No NaN values found in feature columns.
+2026-08-25 01:54:21,179 - INFO - Row count: 10000
+2026-08-25 01:54:21,182 - INFO - Symbols: ['EURUSD', 'USDJPY', 'AUDUSD', 'GBPUSD', 'USDCAD']
+2026-08-25 01:54:21,182 - INFO - Load_and_Process completed successfully.
+[FXJEFE-PROD] post-validate Load_and_Process.py: []
+[FXJEFE-PROD] RUN adjust_headers.py (timeout=180s) — visible child
+2026-08-25 01:54:21,627 - INFO - Script started and configuration loaded successfully
+2026-08-25 01:54:23,126 - WARNING - No expected headers defined for candle_data.csv
+2026-08-25 01:54:23,126 - WARNING - No expected headers defined for FXJEFE_activations.csv
+2026-08-25 01:54:23,129 - WARNING - No expected headers defined for FXJEFE_Crypto_Features.csv
+2026-08-25 01:54:23,129 - WARNING - No expected headers defined for FXJEFE_deals.csv
+2026-08-25 01:54:23,130 - WARNING - No expected headers defined for FXJEFE_Features.csv
+2026-08-25 01:54:23,131 - WARNING - No expected headers defined for FXJEFE_Features_advanced.csv
+2026-08-25 01:54:23,131 - WARNING - No expected headers defined for FXJEFE_Features_fixed.csv
+2026-08-25 01:54:23,131 - WARNING - No expected headers defined for FXJEFE_Features_with_labels.csv
+2026-08-25 01:54:23,131 - WARNING - No expected headers defined for FXJEFE_Features_with_signals.csv
+2026-08-25 01:54:23,132 - WARNING - No expected headers defined for fxjefe_labels.csv
+2026-08-25 01:54:23,132 - WARNING - No expected headers defined for FXJEFE_matrix_price.csv
+2026-08-25 01:54:23,133 - WARNING - No expected headers defined for FXJEFE_merged.csv
+2026-08-25 01:54:23,133 - WARNING - No expected headers defined for FXJEFE_patterns.csv
+2026-08-25 01:54:23,133 - WARNING - No expected headers defined for FXJEFE_patterns_last.csv
+2026-08-25 01:54:23,133 - WARNING - No expected headers defined for FXJEFE_positions.csv
+2026-08-25 01:54:23,134 - WARNING - No expected headers defined for FXJEFE_trades.csv
+2026-08-25 01:54:23,134 - WARNING - No expected headers defined for FXJEFE_trades_outcomes.csv
+2026-08-25 01:54:23,134 - WARNING - No expected headers defined for historic_ohlcv_index.csv
+2026-08-25 01:54:23,134 - WARNING - No expected headers defined for Matrix_price.csv
+2026-08-25 01:54:23,135 - WARNING - No expected headers defined for parsed_log_signals.csv
+2026-08-25 01:54:23,135 - WARNING - No expected headers defined for processed_features.csv
+2026-08-25 01:54:23,135 - WARNING - No expected headers defined for realtime_data.csv
+2026-08-25 01:54:23,135 - WARNING - No expected headers defined for signals_output.csv
+2026-08-25 01:54:23,135 - WARNING - No expected headers defined for training_data.csv
+2026-08-25 01:54:23,136 - WARNING - No expected headers defined for training_data_updated.csv
+[FXJEFE-PROD] post-validate adjust_headers.py: []
+[FXJEFE-PROD] RUN generate_labels.py (timeout=300s) — visible child
+2026-08-25 01:54:28,861 - INFO - Read 10000 rows.  Columns: ['time', 'symbol', 'price', 'atr', 'ema_diff', 'rsi', 'macd_diff', 'vwap', 'price_vwap_diff', 'bb_position', 'roc', 'stochastic', 'cci', 'williams', 'momentum', 'realized_vol', 'chaikin_vol', 'adx', 'rvi', 'obv', 'volume_delta', 'ad_line', 'vol_osc', 'supertrend', 'hma', 'ichimoku_tenkan', 'sar', 'dpo', 'spread', 'sentiment', 'signal']
+2026-08-25 01:54:31,530 - INFO - Saved cleaned CSV  → C:\Users\locallarry\Documents\FXJEFE_Project\data\FXJEFE_Features_fixed.csv
+2026-08-25 01:54:31,540 - INFO - look_ahead=5, forex_threshold=0.001, crypto_threshold=0.002
+2026-08-25 01:54:31,583 - INFO -   EURUSD labels: {0: 1995}
+2026-08-25 01:54:31,587 - INFO -   USDJPY labels: {0: 1987, -1: 5, 1: 3}
+2026-08-25 01:54:31,590 - INFO -   AUDUSD labels: {0: 1989, -1: 5, 1: 1}
+2026-08-25 01:54:31,593 - INFO -   GBPUSD labels: {0: 1989, -1: 6}
+2026-08-25 01:54:31,598 - INFO -   USDCAD labels: {0: 1990, 1: 5}
+2026-08-25 01:54:31,603 - INFO - Overall label distribution: {0: 9950, -1: 16, 1: 9}
+2026-08-25 01:54:32,177 - INFO - Saved labeled CSV  → C:\Users\locallarry\Documents\FXJEFE_Project\data\FXJEFE_Features_with_labels.csv
+2026-08-25 01:54:32,758 - INFO - Saved training CSV → C:\Users\locallarry\Documents\FXJEFE_Project\data\training_data.csv  (9975 rows)
+[FXJEFE-PROD] post-validate generate_labels.py: [{'file': 'C:\\Users\\locallarry\\Documents\\FXJEFE_Project\\data\\training_data.csv', 'exists': True}, {'file': 'C:\\Users\\locallarry\\Documents\\FXJEFE_Project\\data\\FXJEFE_Features_with_labels.csv', 'exists': True}]
+[FXJEFE-PROD] RUN feature_engineering.py (timeout=900s) — visible child
+2026-08-25 01:54:38,877 - WARNING - lightgbm not installed — stacking model will use RandomForest as fallback.
+2026-08-25 01:54:38,939 - INFO - feature_engineering.py started.
+2026-08-25 01:54:39,116 - INFO - Loaded 9975 rows from C:\Users\locallarry\Documents\FXJEFE_Project\data\FXJEFE_Features_with_labels.csv
+2026-08-25 01:54:39,117 - INFO - No raw OHLCV columns — using pre-computed MT5 indicators as-is.
+2026-08-25 01:54:39,131 - INFO - Training on 9975 rows × 28 features.
+2026-08-25 01:54:39,133 - INFO - Tuning XGBoost with Optuna (20 trials).
+[I 2026-08-25 01:54:39,134] A new study created in memory with name: no-name-cfe09585-6e17-4fd5-a578-be6428746b89
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:54:39] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:54:40] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:54:43] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:54:44] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:54:45] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:54:47] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:54:49] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:54:51] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:54:53] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:54:54] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:54:56] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:54:58] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:55:00] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:55:01] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:55:03] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:55:04] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:55:06] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:55:07] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:55:09] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:55:11] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+2026-08-25 01:55:13,143 - INFO - Best XGBoost params: {'n_estimators': 84, 'max_depth': 7, 'learning_rate': 0.26159084885811473, 'subsample': 0.6585996949643118}
+2026-08-25 01:55:13,144 - INFO - Using default LightGBM params (lightgbm not available).
+2026-08-25 01:55:13,146 - INFO - Training stacking classifier (XGBoost + LightGBM → LogisticRegression).
+C:\Users\locallarry\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xgboost\training.py:200: UserWarning: [01:55:30] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+[01:55:38] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+[01:55:38] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+[01:55:38] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:794:
+Parameters: { "use_label_encoder" } are not used.
+
+2026-08-25 01:55:42,832 - INFO - Stacking model trained.
+2026-08-25 01:55:42,989 - INFO - Train accuracy: 0.9975  |  Test accuracy: 0.9975
+2026-08-25 01:55:43,107 - INFO - Stacking model saved → C:\Users\locallarry\Documents\models\og333_runs\stacking_model_v20260824_235542.pkl
+2026-08-25 01:55:43,947 - INFO - Processed features saved → C:\Users\locallarry\Documents\FXJEFE_Project\data\processed_features.csv
+2026-08-25 01:55:43,948 - INFO - feature_engineering.py completed successfully.
+[FXJEFE-PROD] post-validate feature_engineering.py: []
+[FXJEFE-PROD] RUN train_models.py (timeout=600s) — visible child
+2026-08-25 01:55:52,021 - INFO - Loaded 9975 training rows.
+2026-08-25 01:55:52,036 - INFO - Training on 9975 rows with 28 features.
+2026-08-25 01:55:53,656 - INFO - Test accuracy: 0.9975
+2026-08-25 01:55:53,784 - INFO - Model saved → C:\Users\locallarry\Documents\models\og333_runs\my_model_v20260824_235551.pkl  (expects 28 features)
+[FXJEFE-PROD] post-validate train_models.py: [{'file': 'C:\\Users\\locallarry\\Documents\\models\\og333_runs\\my_model_v20260824_235551.pkl', 'exists': True, 'og_untouched': True}]
+[FXJEFE-PROD] RUN check_model_features.py (timeout=120s) — visible child
+2026-08-25 01:55:59,307 - INFO - OG my_model.pkl n_features_in_=29 (legacy — not the required check)
+2026-08-25 01:55:59,400 - INFO - Checking C:\Users\locallarry\Documents\models\og333_runs\my_model_v20260824_235551.pkl
+2026-08-25 01:55:59,400 - INFO - Model feature count : 28
+2026-08-25 01:55:59,402 - INFO - Config feature count: 28  (['price', 'atr', 'ema_diff', 'rsi', 'macd_diff', 'vwap', 'price_vwap_diff', 'bb_position', 'roc', 'stochastic', 'cci', 'williams', 'momentum', 'realized_vol', 'chaikin_vol', 'adx', 'rvi', 'obv', 'volume_delta', 'ad_line', 'vol_osc', 'supertrend', 'hma', 'ichimoku_tenkan', 'sar', 'dpo', 'spread', 'sentiment'])
+2026-08-25 01:55:59,402 - INFO - Feature count check : OK
+[FXJEFE-PROD] post-validate check_model_features.py: [{'train_features': 28, 'predict_features': 17}]
+[FXJEFE-PROD] RUN full_pipeline.py (timeout=7200s) — visible child
+2026-08-25 01:56:03,874 - INFO - ======================================================================
+2026-08-25 01:56:03,875 - INFO - FXJEFE FULL PIPELINE -- Feature Engineering + Labels + Training
+2026-08-25 01:56:03,876 - INFO - ======================================================================
+2026-08-25 01:56:03,877 - INFO - Mode: binary | Filter: symbol=ALL tf=ALL
+2026-08-25 01:56:03,877 - INFO -
+============================================================
+2026-08-25 01:56:03,877 - INFO -   EURUSD M15  (forex)
+2026-08-25 01:56:03,878 - INFO - ============================================================
+2026-08-25 01:56:13,752 - INFO -   No data found for EURUSD M15
+2026-08-25 01:56:13,752 - INFO -   -> Export OHLCV from MT5: File > Open Data Folder > copy CSV to Historical/Marked-data-EURUSD/
+2026-08-25 01:56:13,829 - INFO -   Insufficient data
+2026-08-25 01:56:13,829 - INFO -
+============================================================
+2026-08-25 01:56:13,833 - INFO -   EURUSD H4  (forex)
+2026-08-25 01:56:13,837 - INFO - ============================================================
+2026-08-25 01:56:22,791 - INFO -   No data found for EURUSD H4
+2026-08-25 01:56:22,791 - INFO -   -> Export OHLCV from MT5: File > Open Data Folder > copy CSV to Historical/Marked-data-EURUSD/
+2026-08-25 01:56:22,873 - INFO -   Insufficient data
+2026-08-25 01:56:22,873 - INFO -
+============================================================
+2026-08-25 01:56:22,875 - INFO -   EURUSD D1  (forex)
+2026-08-25 01:56:22,876 - INFO - ============================================================
+2026-08-25 01:56:31,812 - INFO -   No data found for EURUSD D1
+2026-08-25 01:56:31,813 - INFO -   -> Export OHLCV from MT5: File > Open Data Folder > copy CSV to Historical/Marked-data-EURUSD/
+2026-08-25 01:56:31,902 - INFO -   Insufficient data
+2026-08-25 01:56:35,012 - INFO -
+============================================================
+2026-08-25 01:56:35,020 - INFO -   USDJPY H4  (forex)
+2026-08-25 01:56:35,021 - INFO - ============================================================
+2026-08-25 01:56:45,681 - INFO -   No data found for USDJPY H4
+2026-08-25 01:56:45,682 - INFO -   -> Export OHLCV from MT5: File > Open Data Folder > copy CSV to Historical/Marked-data-USDJPY/
+2026-08-25 01:56:45,750 - INFO -   Insufficient data
+2026-08-25 01:56:45,751 - INFO -
+============================================================
+2026-08-25 01:56:45,753 - INFO -   USDJPY D1  (forex)
+2026-08-25 01:56:45,754 - INFO - ============================================================

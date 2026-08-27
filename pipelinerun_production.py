@@ -53,11 +53,14 @@ def err(msg: str) -> None:
 
 
 def project_root() -> Path:
+    env = os.environ.get("FXJEFE_PROJECT_ROOT")
+    if env and env.strip():
+        return Path(env.strip()).expanduser().resolve(strict=False)
     if sys.platform == "win32":
         home = Path(os.environ.get("USERPROFILE", str(Path.home())))
     else:
         home = Path.home()
-    return home / "Documents" / "FXJEFE_Project"
+    return (home / "Documents" / "FXJEFE_Project").resolve(strict=False)
 
 
 def load_feature_registry():
@@ -128,8 +131,9 @@ def ensure_config(root: Path, reg) -> Dict[str, Any]:
         }
     defaults = {
         "project_root": str(root),
-        "scripts_path": str(root),
-        "models_path": str(root / "models"),
+        "scripts_path": str(Path(os.environ.get("USERPROFILE", str(Path.home()))) / "Documents"),
+        "models_path": str(Path(os.environ.get("USERPROFILE", str(Path.home()))) / "Documents" / "models"),
+        "project_models_path": str(root / "models"),
         "data_path": str(root / "data"),
         "data_output_path": str(root / "data"),
         "log_path": str(root / "Logs"),

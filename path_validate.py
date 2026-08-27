@@ -50,8 +50,11 @@ try:
 except ImportError:
     # minimal fallback if path_loader missing
     def default_project_root() -> Path:
+        env = os.environ.get("FXJEFE_PROJECT_ROOT")
+        if env and env.strip():
+            return Path(env.strip()).expanduser().resolve(strict=False)
         home = Path(os.environ.get("USERPROFILE", str(Path.home()))) if sys.platform == "win32" else Path.home()
-        return home / "Documents" / "FXJEFE_Project"
+        return (home / "Documents" / "FXJEFE_Project").resolve(strict=False)
 
     def resolve_paths(root=None):
         root = root or default_project_root()
@@ -61,8 +64,8 @@ except ImportError:
             "data_hist": str(root / "data" / "hist"),
             "features_dir": str(root / "features"),
             "scripts_dir": str(root / "pipeline" / "stages"),
-            "web_predict_url": "http://127.0.0.1:8000/predict",
-            "web_health_url": "http://127.0.0.1:8000/health",
+            "web_predict_url": "http://127.0.0.1:8080/predict",
+            "web_health_url": "http://127.0.0.1:8080/health",
         }
 
     def ensure_path_dirs(resolved):
@@ -89,6 +92,7 @@ DIR_KEYS = {
     "data_hist",
     "features_dir",
     "models_dir",
+    "og_models_dir",
     "scripts_dir",
     "pipeline_dir",
     "bridge_dir",
@@ -215,6 +219,15 @@ def check_url(key: str, url: str) -> Dict[str, Any]:
             item["ok"] = False
             item["issues"].append("missing hostname")
         item["parsed"] = {"scheme": u.scheme, "host": u.hostname, "port": u.port, "path": u.path}
+        port = u.port
+        if port is None and u.scheme == "http":
+            port = 80
+        if port == 8000:
+            item["ok"] = False
+            item["issues"].append("web URL must be 8080, not 8000")
+        if u.hostname in ("127.0.0.1", "localhost") and port not in (8080, None, 80):
+            if port != 8081:
+                item["issues"].append(f"non-8080 local port {port} (live contract is 8080)")
     except Exception as e:
         item["ok"] = False
         item["issues"].append(str(e))
@@ -260,14 +273,17 @@ def check_feature_config(project_root: str) -> Dict[str, Any]:
     try:
         cfg = json.loads(cand.read_text(encoding="utf-8"))
         feats = cfg.get("features") or []
-        item["features_count"] = len(feats)
-        if len(feats) != 17:
+        n = len(feats)
+        item["features_count"] = n
+        # Frozen v1: PREDICT 17 or TRAIN 28. 29 is the legacy mismatch and must fail.
+        if n == 29:
             item["ok"] = False
-            item["issues"].append(f"expected 17 features, found {len(feats)}")
+            item["issues"].append("n_features=29 legacy mismatch — reject (use 17 predict or 28 train)")
+        elif n not in (17, 28):
+            item["ok"] = False
+            item["issues"].append(f"expected 17 (predict) or 28 (train), found {n}")
         forbidden = cfg.get("features_forbidden") or []
-        if "garch_vol" not in forbidden:
-            item["issues"].append("garch_vol not listed in features_forbidden (recommended)")
-        # overlap check
+        # Do not require garch_vol to be forbidden — OG 27/28 uses it.
         overlap = set(feats) & set(forbidden)
         if overlap:
             item["ok"] = False
@@ -444,3 +460,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n[FXJEFE-PATHCHK] interrupted — no background tasks", flush=True)
         sys.exit(130)
+

@@ -1,0 +1,1 @@
+{"schema":"fxjefe.saturn.v1","signal":"buy","confidence":0.9863,"gate_passed":true,"symbol":"XAUUSD","timeframe":"M15","model":"xgb_6","vote_mode":"in_band_fill","stop_loss":4571.15,"take_profit":0.0,"updated":"2026-08-21T11:03:24Z"}

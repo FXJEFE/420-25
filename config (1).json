@@ -1,0 +1,83 @@
+{
+    "config_version": "3.0.0",
+    "system": {
+        "name": "Quantum Algo AI",
+        "version": "9.1.0",
+        "environment": "production"
+    },
+    "symbol_management": {
+        "normalization": {
+            "suffixes": [
+                ".r", ".raw", ".m", "_m", 
+                "pro", ".pro", ".c", ".i", 
+                ".mini", ".micro", "ecn", ".std",
+                "_ecn", "_pro", "_mini"
+            ],
+            "case_sensitive": false,
+            "remove_leading_symbols": true
+        },
+        "symbol_mappings": {
+            "XAUUSD.r": "GOLD",
+            "XAGUSD.r": "SILVER",
+            "US30": "DOW",
+            "US100": "NASDAQ",
+            "US500": "S&P500"
+        },
+        "symbol_aliases": {
+            "#AAPL": "APPLE",
+            "#MSFT": "MICROSOFT",
+            "#GOOGL": "GOOGLE"
+        },
+        "instrument_groups": {
+            "forex": {
+                "enabled": true,
+                "symbols": [
+                    "EURUSD", "GBPUSD", "USDJPY", "USDCHF", 
+                    "AUDUSD", "NZDUSD", "USDCAD", "XAUUSD.r"
+                ],
+                "suffixes": [".r", ""],
+                "max_pairs": 56
+            }
+        }
+    },
+    "ml_configuration": {
+        "models": {
+            "ensemble": {
+                "type": "random_forest",
+                "feature_count": 27,
+                "confidence_threshold": 0.65,
+                "path": "./models/ensemble_model.pkl"
+            },
+            "lstm": {
+                "type": "sequential",
+                "lookback_period": 50,
+                "units": [64, 32, 16],
+                "path": "./models/lstm_model.h5"
+            },
+            "ltdm": {
+                "type": "transformer",
+                "sequence_length": 100,
+                "path": "./models/ltdm_model.pkl"
+            }
+        },
+        "training": {
+            "random_seed": 42,
+            "test_size": 0.2,
+            "cross_validation": {
+                "folds": 5,
+                "shuffle": true
+            }
+        }
+    },
+    "risk_management": {
+        "position_sizing": {
+            "method": "kelly_criterion",
+            "max_risk_per_trade": 0.5,
+            "confidence_threshold": 0.65
+        },
+        "correlation_limits": {
+            "max_correlation": 0.7,
+            "diversification_check": true
+        }
+    }
+}

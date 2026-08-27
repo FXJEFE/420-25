@@ -1,0 +1,51 @@
+# FXJEFE / SaturnSyncAmen — Python 3.11.9
+# Install order: local wheels first, then this file.
+#   pip install --find-links _wheels_cp311 --find-links talib-build-main/talib-build-main ta-lib
+#   pip install -r requirements-fxjefe.txt
+
+# Core numeric (prefer MKL wheels when present in _wheels_cp311)
+numpy>=1.26.0
+scipy>=1.11.0
+pandas>=2.1.4
+numexpr>=2.8.0
+
+# ML
+scikit-learn>=1.3.2
+xgboost>=2.0.3
+lightgbm>=4.0.0
+joblib>=1.3.2
+optuna>=3.5.0
+onnxruntime>=1.16.0
+# torch is large; installed separately if the wheel is available
+
+# Serving / HTTP
+flask>=3.0.0
+waitress>=3.0.0
+requests>=2.31.0
+flask-cors>=4.0.0
+
+# MT5 + ZMQ (pyzmq vendors libzmq)
+MetaTrader5>=5.0.4424
+pyzmq>=25.1.0
+
+# TA
+# ta-lib from local cgohlke wheel (talib-build-main)
+TA-Lib>=0.4.28
+
+# Misc used by live server / pipeline
+textblob>=0.18.0
+python-dotenv>=1.0.0
+pyyaml>=6.0
+tqdm>=4.66.0
+pillow>=10.0.0
+psutil>=5.9.6
+loguru>=0.7.2
+httpx>=0.27.0
+
+# Optional extras present in OG333 list (skip if they fail)
+catboost>=1.2.0
+imbalanced-learn>=0.11.0
+shap>=0.44.0
+statsmodels>=0.14.0
+arch>=6.2.0
+hmmlearn>=0.3.0

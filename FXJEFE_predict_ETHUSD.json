@@ -1,0 +1,1 @@
+{"schema":"fxjefe.saturn.v1","signal":"sell","confidence":0.9575,"gate_passed":true,"symbol":"ETHUSD","timeframe":"M15","model":"ensemble_9a","vote_mode":"in_band_fill","stop_loss":2402.33,"take_profit":0.0,"updated":"2026-08-21T11:03:18Z"}

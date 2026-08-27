@@ -1,0 +1,1 @@
+{"schema":"fxjefe.saturn.v1","signal":"buy","confidence":0.9855,"gate_passed":true,"symbol":"USDJPY","timeframe":"M15","model":"xgb_6","vote_mode":"in_band_fill","stop_loss":158.637,"take_profit":0.0,"updated":"2026-08-21T11:03:00Z"}

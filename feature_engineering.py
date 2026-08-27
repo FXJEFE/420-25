@@ -1,13 +1,3 @@
-# -*- coding: utf-8 -*-
-import os as _os_utf8, sys as _sys_utf8
-_os_utf8.environ.setdefault('PYTHONUTF8','1')
-_os_utf8.environ.setdefault('PYTHONIOENCODING','utf-8')
-for _s in (getattr(_sys_utf8,'stdout',None), getattr(_sys_utf8,'stderr',None)):
-    try:
-        if _s is not None and hasattr(_s,'reconfigure'):
-            _s.reconfigure(encoding='utf-8', errors='replace')
-    except Exception:
-        pass
 """
 feature_engineering.py
 Reads FXJEFE_Features_with_labels.csv (output of generate_labels.py),
@@ -287,14 +277,11 @@ def main():
     model_path = safe_model_out_path(config, 'stacking_model.pkl')
     assert_not_og_model(model_path)
     joblib.dump(model, model_path)
-    logging.info(f"Stacking model saved (OG stacking_model.pkl untouched) → {model_path}")
+    logging.info(f"Stacking model saved → {model_path}")
 
     out_path = os.path.join(config['data_output_path'], 'processed_features.csv')
-    # OG: always write processed + labeled feature CSVs to ALL destinations (never skip)
-    from fxjefe_paths import write_feature_csv
-    write_feature_csv(df, config, 'processed_features.csv')
-    write_feature_csv(df, config, 'FXJEFE_Features_with_labels.csv')
-    logging.info(f"Processed features saved → {out_path} (+ all OG mirrors)")
+    df.to_csv(out_path, index=False, encoding='utf-8')
+    logging.info(f"Processed features saved → {out_path}")
 
     logging.info("feature_engineering.py completed successfully.")
 
