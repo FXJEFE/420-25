@@ -1,11 +1,20 @@
 # -*- coding: utf-8 -*-
+import os as _os_utf8, sys as _sys_utf8
+_os_utf8.environ.setdefault('PYTHONUTF8','1')
+_os_utf8.environ.setdefault('PYTHONIOENCODING','utf-8')
+for _s in (getattr(_sys_utf8,'stdout',None), getattr(_sys_utf8,'stderr',None)):
+    try:
+        if _s is not None and hasattr(_s,'reconfigure'):
+            _s.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
 import json
 import os
 import logging
 import pandas as pd
 
 # Path to the config file
-CONFIG_PATH = 'C:\\Users\\LarryLocal\\Documents\\FXJEFE_Project\\config.json'
+CONFIG_PATH = 'C:\\Users\\locallarry\\Documents\\FXJEFE_Project\\config.json'
 
 # Load the config file safely
 try:

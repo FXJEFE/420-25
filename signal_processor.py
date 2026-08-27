@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+import os as _os_utf8, sys as _sys_utf8
+_os_utf8.environ.setdefault('PYTHONUTF8','1')
+_os_utf8.environ.setdefault('PYTHONIOENCODING','utf-8')
+for _s in (getattr(_sys_utf8,'stdout',None), getattr(_sys_utf8,'stderr',None)):
+    try:
+        if _s is not None and hasattr(_s,'reconfigure'):
+            _s.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
 """
 signal_processor.py
 Reads FXJEFE_Features.csv, applies SMA crossover logic to generate

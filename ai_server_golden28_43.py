@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+import os as _os_utf8, sys as _sys_utf8
+_os_utf8.environ.setdefault("PYTHONUTF8", "1")
+_os_utf8.environ.setdefault("PYTHONIOENCODING", "utf-8")
+# -*- coding: utf-8 -*-
 """
 ai_server_golden.py — FXJEFE Comprehensive Golden AI Server (port 8080)
 
