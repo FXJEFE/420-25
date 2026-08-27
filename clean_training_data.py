@@ -1,14 +1,23 @@
 # -*- coding: utf-8 -*-
+import os as _os_utf8, sys as _sys_utf8
+_os_utf8.environ.setdefault('PYTHONUTF8','1')
+_os_utf8.environ.setdefault('PYTHONIOENCODING','utf-8')
+for _s in (getattr(_sys_utf8,'stdout',None), getattr(_sys_utf8,'stderr',None)):
+    try:
+        if _s is not None and hasattr(_s,'reconfigure'):
+            _s.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
 import json
 import os
 import logging
 
 # Path to the config file
-CONFIG_PATH = 'C:\\Users\\LarryLocal\\Documents\\FXJEFE_Project\\config.json'
+CONFIG_PATH = 'C:\\Users\\locallarry\\Documents\\FXJEFE_Project\\config.json'
 
 # Load the config file safely
 try:
-    with open(CONFIG_PATH, 'r') as f:
+    with open(CONFIG_PATH, 'r', encoding='utf-8', errors='replace') as f:
         config = json.load(f)
 except FileNotFoundError:
     print(f"Error: Could not find config file at {CONFIG_PATH}")
@@ -23,7 +32,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(log_file),
+        logging.FileHandler(log_file, encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
@@ -31,7 +40,7 @@ logging.info("Script started and configuration loaded successfully")
 
 import json
 import os
-with open('C:\\Users\\LarryLocal\\Documents\\FXJEFE_Project\\config.json', 'r') as f:
+with open('C:\\Users\\locallarry\\Documents\\FXJEFE_Project\\config.json', 'r', encoding='utf-8', errors='replace') as f:
     config = json.load(f)
 import pandas as pd 
 import logging 
@@ -117,8 +126,11 @@ def fix_csv():
         if len(df) < 1000: 
             logging.warning(f"Low row count ({len(df)}); run GenerateFeatures.mq5 again") 
  
-        df.to_csv(OUTPUT_PATH, encoding='utf-8', index=False) 
-        logging.info(f"Saved fixed CSV to {OUTPUT_PATH}") 
+        # OG: always write fixed features to ALL destinations (never skip)
+        from fxjefe_paths import write_feature_csv
+        write_feature_csv(df, config, 'FXJEFE_Features_fixed.csv')
+        write_feature_csv(df, config, 'FXJEFE_Features.csv')
+        logging.info(f"Saved fixed CSV to {OUTPUT_PATH} (+ all OG mirrors)") 
     except Exception as e: 
         logging.error(f"Error: {e}") 
         raise 

@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+import os as _os_utf8, sys as _sys_utf8
+_os_utf8.environ.setdefault('PYTHONUTF8','1')
+_os_utf8.environ.setdefault('PYTHONIOENCODING','utf-8')
+for _s in (getattr(_sys_utf8,'stdout',None), getattr(_sys_utf8,'stderr',None)):
+    try:
+        if _s is not None and hasattr(_s,'reconfigure'):
+            _s.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
 """
 generate_labels.py
 Reads FXJEFE_Features.csv (all 27 model features + price), fills gaps,
@@ -138,12 +148,15 @@ def main():
     if len(df) < 500:
         logging.warning(f"Only {len(df)} rows — re-run GenerateFeatures.mq5 with more History_Bars.")
 
-    df.to_csv(fixed_path, encoding='utf-8', index=False)
-    logging.info(f"Saved cleaned CSV  → {fixed_path}")
+    # OG: ALWAYS write feature CSVs to all destinations (never skip)
+    from fxjefe_paths import write_feature_csv
+    write_feature_csv(df, config, 'FXJEFE_Features_fixed.csv')
+    write_feature_csv(df, config, 'FXJEFE_Features.csv')  # keep primary in sync
+    logging.info(f"Saved cleaned CSV  → {fixed_path} (+ all OG mirrors)")
 
     df = generate_labels(df)
-    df.to_csv(labeled_path, encoding='utf-8', index=False)
-    logging.info(f"Saved labeled CSV  → {labeled_path}")
+    write_feature_csv(df, config, 'FXJEFE_Features_with_labels.csv')
+    logging.info(f"Saved labeled CSV  → {labeled_path} (+ all OG mirrors)")
 
     # training_data.csv — only features + label for train_models.py
     train_cols = config['features'] + ['label']
@@ -151,8 +164,9 @@ def main():
     if missing:
         logging.error(f"Missing training columns: {missing}")
         raise ValueError(f"Missing columns: {missing}")
-    df[train_cols].dropna().to_csv(training_path, encoding='utf-8', index=False)
-    logging.info(f"Saved training CSV → {training_path}  ({len(df)} rows)")
+    train_df = df[train_cols].dropna()
+    write_feature_csv(train_df, config, 'training_data.csv')
+    logging.info(f"Saved training CSV → {training_path}  ({len(train_df)} rows, all OG mirrors)")
 
 if __name__ == '__main__':
     main()

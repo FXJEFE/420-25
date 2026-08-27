@@ -42,38 +42,52 @@ import json
 import os
 with open('C:\\Users\\locallarry\\Documents\\FXJEFE_Project\\config.json', 'r', encoding='utf-8', errors='replace') as f:
     config = json.load(f)
+import requests
 import json
 import logging
-import pandas as pd
-import os
 
-# Load configuration
-with open('config.json', 'r', encoding='utf-8', errors='replace') as f:
-    config = json.load(f)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Set up logging
-logging.basicConfig(filename=os.path.join(config['log_path'], 'pipeline.log'), level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+url = "http://localhost:8080/predict"
+data = {
+    "time": "2023-10-01 12:00:00",
+    "symbol": "EURUSD.r",
+    "price": 1.1234,
+    "atr": 0.0005,
+    "ema_diff": 0.0001,
+    "rsi": 60.0,
+    "macd_diff": 0.0,
+    "vwap": 1.1235,
+    "price_vwap_diff": -0.0001,
+    "bb_position": 0.5,
+    "roc": 0.01,
+    "stochastic": 70.0,
+    "cci": 100.0,
+    "williams": -30.0,
+    "momentum": 0.02,
+    "realized_vol": 0.001,
+    "chaikin_vol": 0.0,
+    "adx": 30.0,
+    "rvi": 55.0,
+    "obv": 1000000.0,
+    "volume_delta": 500.0,
+    "ad_line": 2000000.0,
+    "vol_osc": 0.0,
+    "supertrend": 1.1230,
+    "hma": 1.1232,
+    "ichimoku_tenkan": 1.1233,
+    "sar": 1.1229,
+    "dpo": 0.0,
+    "spread": 0.0002,
+    "sentiment": 0.5  # Placeholder
+}
 
-def merge_datasets():
-    """Merge features and trades datasets."""
-    from fxjefe_paths import write_feature_csv
-    features_csv = os.path.join(config['data_output_path'], 'FXJEFE_Features.csv')
-    trades_csv = os.path.join(config['data_output_path'], 'FXJEFE_trades.csv')
-    if not os.path.exists(features_csv):
-        raise FileNotFoundError(features_csv)
-    features_df = pd.read_csv(features_csv, encoding='utf-8', low_memory=False)
-    if os.path.exists(trades_csv):
-        trades_df = pd.read_csv(trades_csv, encoding='utf-8', low_memory=False)
-        if "time" in trades_df.columns and "symbol" in trades_df.columns:
-            merged_df = pd.merge(features_df, trades_df, on=['time', 'symbol'], how='left')
-        else:
-            merged_df = features_df.copy()
-    else:
-        merged_df = features_df.copy()
-    write_feature_csv(merged_df, config, "FXJEFE_merged.csv")
-    logging.info("Merged datasets rows=%s", len(merged_df))
-    print(f"OK merge_datasets: {len(merged_df)} rows", flush=True)
-
-if __name__ == "__main__":
-    merge_datasets()
+try:
+    json_string = json.dumps(data).strip()
+    json.loads(json_string)  # Validate JSON
+    response = requests.post(url, json=data)
+    logging.info(f"Response: {response.json()}")
+except json.JSONDecodeError as e:
+    logging.error(f"Invalid JSON: {e}")
+except requests.RequestException as e:
+    logging.error(f"Request failed: {e}")

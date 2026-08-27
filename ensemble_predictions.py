@@ -1,14 +1,23 @@
 # -*- coding: utf-8 -*-
+import os as _os_utf8, sys as _sys_utf8
+_os_utf8.environ.setdefault('PYTHONUTF8','1')
+_os_utf8.environ.setdefault('PYTHONIOENCODING','utf-8')
+for _s in (getattr(_sys_utf8,'stdout',None), getattr(_sys_utf8,'stderr',None)):
+    try:
+        if _s is not None and hasattr(_s,'reconfigure'):
+            _s.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
 import json
 import os
 import logging
 
 # Path to the config file
-CONFIG_PATH = 'C:\\Users\\LarryLocal\\Documents\\FXJEFE_Project\\config.json'
+CONFIG_PATH = 'C:\\Users\\locallarry\\Documents\\FXJEFE_Project\\config.json'
 
 # Load the config file safely
 try:
-    with open(CONFIG_PATH, 'r') as f:
+    with open(CONFIG_PATH, 'r', encoding='utf-8', errors='replace') as f:
         config = json.load(f)
 except FileNotFoundError:
     print(f"Error: Could not find config file at {CONFIG_PATH}")
@@ -23,7 +32,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(log_file),
+        logging.FileHandler(log_file, encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
@@ -40,15 +49,15 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('C:\\Users\\LarryLocal\\Documents\\FXJEFE_Project\\Logs\\ensemble_predictions.log'),
+        logging.FileHandler('C:\\Users\\locallarry\\Documents\\FXJEFE_Project\\Logs\\ensemble_predictions.log', encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
 
 def load_config():
-    config_path = 'C:\\Users\\LarryLocal\\Documents\\FXJEFE_Project\\config.json'
+    config_path = 'C:\\Users\\locallarry\\Documents\\FXJEFE_Project\\config.json'
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path, 'r', encoding='utf-8', errors='replace') as f:
             return json.load(f)
     except Exception as e:
         logging.error(f"Failed to load config.json: {e}")
@@ -77,10 +86,10 @@ def main():
     output_path = os.path.join(config['data_output_path'], 'FXJEFE_Predictions.csv')
     
     try:
-        data = pd.read_csv(data_path)
+        data = pd.read_csv(data_path, encoding='utf-8')
         result = generate_predictions(data, config['features'], model_path)
         if result is not None:
-            result.to_csv(output_path, index=False)
+            result.to_csv(output_path, index=False, encoding='utf-8')
             logging.info(f"Predictions saved to {output_path}")
     except Exception as e:
         logging.error(f"Error processing data: {e}")

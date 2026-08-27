@@ -42,38 +42,40 @@ import json
 import os
 with open('C:\\Users\\locallarry\\Documents\\FXJEFE_Project\\config.json', 'r', encoding='utf-8', errors='replace') as f:
     config = json.load(f)
-import json
+import re
 import logging
-import pandas as pd
-import os
 
-# Load configuration
-with open('config.json', 'r', encoding='utf-8', errors='replace') as f:
-    config = json.load(f)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# Set up logging
-logging.basicConfig(filename=os.path.join(config['log_path'], 'pipeline.log'), level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-
-def merge_datasets():
-    """Merge features and trades datasets."""
-    from fxjefe_paths import write_feature_csv
-    features_csv = os.path.join(config['data_output_path'], 'FXJEFE_Features.csv')
-    trades_csv = os.path.join(config['data_output_path'], 'FXJEFE_trades.csv')
-    if not os.path.exists(features_csv):
-        raise FileNotFoundError(features_csv)
-    features_df = pd.read_csv(features_csv, encoding='utf-8', low_memory=False)
-    if os.path.exists(trades_csv):
-        trades_df = pd.read_csv(trades_csv, encoding='utf-8', low_memory=False)
-        if "time" in trades_df.columns and "symbol" in trades_df.columns:
-            merged_df = pd.merge(features_df, trades_df, on=['time', 'symbol'], how='left')
-        else:
-            merged_df = features_df.copy()
-    else:
-        merged_df = features_df.copy()
-    write_feature_csv(merged_df, config, "FXJEFE_merged.csv")
-    logging.info("Merged datasets rows=%s", len(merged_df))
-    print(f"OK merge_datasets: {len(merged_df)} rows", flush=True)
+def test_regex(log_file_path):
+    # Updated regex pattern
+    pattern = re.compile(
+        r'(\d{4}\.\d{2}\.\d{2}\s+\d{2}:\d{2}:\d{2})\s+Features\s+for\s+(\w+):\s+'
+        r'price=(\d*\.\d+),\s+atr=(\d*\.\d+),\s+signal=(buy|sell|hold)'
+    )
+    
+    matched = 0
+    unmatched = 0
+    try:
+        with open(log_file_path, 'r', encoding='utf-8') as file:
+            for line in file:
+                match = pattern.match(line.strip())
+                if match:
+                    time, symbol, price, atr, signal = match.groups()
+                    logging.info(f"Matched: time={time}, symbol={symbol}, price={price}, atr={atr}, signal={signal}")
+                    matched += 1
+                else:
+                    logging.warning(f"Unmatched line: {line.strip()}")
+                    unmatched += 1
+        logging.info(f"Total matched: {matched}, unmatched: {unmatched}")
+    except FileNotFoundError:
+        logging.error(f"Log file {log_file_path} not found")
+    except UnicodeDecodeError:
+        logging.error(f"Encoding error in {log_file_path}. Ensure UTF-8 encoding.")
 
 if __name__ == "__main__":
-    merge_datasets()
+    logp = os.path.join(config.get("project_root") or "", "FXJEFE_log.txt")
+    if not os.path.isfile(logp):
+        logp = "FXJEFE_log.txt"
+    test_regex(logp)
+    print(f"OK test_regex: parsed {logp}", flush=True)

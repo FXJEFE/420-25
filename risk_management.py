@@ -1,124 +1,126 @@
 # -*- coding: utf-8 -*-
-import json
-import os
-import logging
-
-# Path to the config file
-CONFIG_PATH = 'C:\\Users\\LarryLocal\\Documents\\FXJEFE_Project\\config.json'
-
-# Load the config file safely
-try:
-    with open(CONFIG_PATH, 'r') as f:
-        config = json.load(f)
-except FileNotFoundError:
-    print(f"Error: Could not find config file at {CONFIG_PATH}")
-    exit(1)
-except json.JSONDecodeError as e:
-    print(f"Error: Config file has invalid format - {e}")
-    exit(1)
-
-# Set up logging
-log_file = os.path.join(config['log_path'], 'script.log')  # Change 'script.log' to match the script's name
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(log_file),
-        logging.StreamHandler()
-    ]
-)
-logging.info("Script started and configuration loaded successfully")
-
-import json
+"""Risk checks + position sizing (uses MetaTrader5 package correctly)."""
+from fxjefe_paths import load_config, setup_logging, features_path
 import logging
 import os
-from MetaTrader5 import MT5
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('C:\\Users\\LarryLocal\\Documents\\FXJEFE_Project\\Logs\\risk_management.log'),
-        logging.StreamHandler()
-    ]
-)
-
-def load_config():
-    config_path = 'C:\\Users\\LarryLocal\\Documents\\FXJEFE_Project\\config.json'
-    try:
-        with open(config_path, 'r') as f:
-            return json.load(f)
-    except Exception as e:
-        logging.error(f"Failed to load config.json: {e}")
-        raise
+import json
+import pandas as pd
 
 config = load_config()
+setup_logging(config, "risk_management")
 
-def calculate_position_size(account_balance, risk_percent, stop_loss_pips, pip_value):
-    risk_amount = account_balance * (risk_percent / 100)
-    lot_size = risk_amount / (stop_loss_pips * pip_value)
-    max_lot = config['risk_management']['max_position_size']
-    return min(lot_size, max_lot)
+# defaults if config section missing
+RM = config.get("risk_management") or {
+    "risk_percent": 1.0,
+    "max_position_size": 1.0,
+    "max_drawdown_percent": 20.0,
+    "default_sl_atr_mult": 2.0,
+}
+config["risk_management"] = RM
 
-def check_drawdown(account_balance, initial_balance):
-    drawdown_percent = ((initial_balance - account_balance) / initial_balance) * 100
-    max_drawdown = config['risk_management']['max_drawdown_percent']
-    if drawdown_percent > max_drawdown:
-        logging.warning(f"Max drawdown exceeded: {drawdown_percent}% > {max_drawdown}%")
+
+def calculate_position_size(balance: float, risk_percent: float, sl_pips: float, pip_value: float) -> float:
+    if sl_pips <= 0 or pip_value <= 0:
+        return 0.01
+    risk_amount = balance * (risk_percent / 100.0)
+    lot = risk_amount / (sl_pips * pip_value)
+    return float(min(max(lot, 0.01), float(RM.get("max_position_size", 1.0))))
+
+
+def check_drawdown(balance: float, initial: float) -> bool:
+    if initial <= 0:
+        return True
+    dd = ((initial - balance) / initial) * 100.0
+    max_dd = float(RM.get("max_drawdown_percent", 20.0))
+    if dd > max_dd:
+        logging.warning("Max drawdown exceeded: %.2f%% > %.2f%%", dd, max_dd)
         return False
     return True
 
-def apply_risk_management(symbol, signal, price, atr):
+
+def apply_risk_management(symbol: str, signal: str, price: float, atr: float, balance: float = 10000.0):
+    mult = float(RM.get("default_sl_atr_mult", 2.0))
+    atr = atr if atr and atr > 0 else price * 0.001
+    if signal == "buy":
+        sl = price - mult * atr
+        tp = price + mult * atr * 1.5
+    elif signal == "sell":
+        sl = price + mult * atr
+        tp = price - mult * atr * 1.5
+    else:
+        return {"symbol": symbol, "signal": "hold", "lot": 0.0, "sl": None, "tp": None}
+
+    # rough pip value
+    pip = 0.0001 if price < 50 else (0.01 if price < 500 else 1.0)
+    sl_pips = abs(price - sl) / pip
+    pip_value = 10.0  # approx per standard lot for many FX pairs
+    lot = calculate_position_size(balance, float(RM.get("risk_percent", 1.0)), sl_pips, pip_value)
+    return {
+        "symbol": symbol,
+        "signal": signal,
+        "price": price,
+        "atr": atr,
+        "lot": round(lot, 2),
+        "sl": round(sl, 5),
+        "tp": round(tp, 5),
+        "balance_ok": check_drawdown(balance, balance),  # placeholder true at start
+    }
+
+
+def main() -> None:
+    balance = 10000.0
+    equity = 10000.0
     try:
-        if not MT5.initialize():
-            logging.error("MT5 initialization failed")
-            return False
+        import MetaTrader5 as mt5
 
-        account_info = MT5.account_info()
-        if not account_info:
-            logging.error("Failed to get account info")
-            return False
-
-        balance = account_info.balance
-        initial_balance = balance  # Adjust based on your tracking method
-
-        if not check_drawdown(balance, initial_balance):
-            logging.error("Trading halted due to excessive drawdown")
-            return False
-
-        stop_loss = price - (config['risk_management']['stop_loss_multiplier'] * atr) if signal == 'buy' else price + (config['risk_management']['stop_loss_multiplier'] * atr)
-        stop_loss_pips = abs(price - stop_loss) * 10000  # For 5-digit brokers
-        pip_value = 10  # Adjust based on symbol and broker
-
-        lot_size = calculate_position_size(balance, 1.0, stop_loss_pips, pip_value)
-        logging.info(f"Calculated lot size: {lot_size} for {symbol}")
-
-        request = {
-            "action": MT5.TRADE_ACTION_DEAL,
-            "symbol": symbol,
-            "volume": lot_size,
-            "type": MT5.ORDER_TYPE_BUY if signal == 'buy' else MT5.ORDER_TYPE_SELL,
-            "price": price,
-            "sl": stop_loss,
-            "type_time": MT5.ORDER_TIME_GTC,
-            "type_filling": MT5.ORDER_FILLING_IOC
-        }
-
-        result = MT5.order_send(request)
-        if result.retcode != MT5.TRADE_RETCODE_DONE:
-            logging.error(f"Trade failed: {result.comment}")
-            return False
-
-        logging.info(f"Trade placed: {symbol}, {signal}, Lot: {lot_size}, SL: {stop_loss}")
-        return True
+        if mt5.initialize():
+            info = mt5.account_info()
+            if info:
+                balance = float(info.balance)
+                equity = float(info.equity)
+                logging.info("MT5 account balance=%.2f equity=%.2f server=%s", balance, equity, info.server)
+            mt5.shutdown()
+        else:
+            logging.warning("MT5 init failed — using default balance 10000")
     except Exception as e:
-        logging.error(f"Risk management error: {str(e)}")
-        return False
+        logging.warning("MT5 unavailable: %s — using default balance", e)
 
-def main():
-    logging.info("Risk management started")
-    # Example usage: integrate with QuantumAlgoAI.mq5 or ai_server.py
-    # apply_risk_management("EURUSD.r", "buy", 1.1000, 0.0005)
+    if not check_drawdown(equity, balance if balance > 0 else equity):
+        logging.error("Drawdown gate failed")
+    else:
+        logging.info("Drawdown check OK")
+
+    # sample from latest features
+    src = features_path(config, "FXJEFE_Features_with_signals.csv")
+    if not os.path.isfile(src):
+        src = features_path(config)
+    results = []
+    if os.path.isfile(src):
+        df = pd.read_csv(src, encoding="utf-8", low_memory=False)
+        if not df.empty:
+            last = df.groupby(df["symbol"] if "symbol" in df.columns else df.columns[0]).tail(1)
+            for _, row in last.iterrows():
+                sym = str(row.get("symbol", "EURUSD"))
+                price = float(row.get("price", 0) or 0)
+                atr = float(row.get("atr", 0) or 0)
+                sig = str(row.get("signal", "hold")).lower()
+                if sig in ("1", "buy"):
+                    sig = "buy"
+                elif sig in ("-1", "sell"):
+                    sig = "sell"
+                else:
+                    sig = "hold"
+                results.append(apply_risk_management(sym, sig, price, atr, balance=balance))
+    else:
+        results.append(apply_risk_management("EURUSD", "hold", 1.1, 0.0005, balance=balance))
+
+    out = os.path.join(config["data_path"], "risk_management_output.json")
+    with open(out, "w", encoding="utf-8") as f:
+        json.dump({"balance": balance, "equity": equity, "positions": results}, f, indent=2)
+    logging.info("Wrote %s (%s symbols)", out, len(results))
+    for r in results:
+        logging.info("  %s", r)
+
 
 if __name__ == "__main__":
     main()
